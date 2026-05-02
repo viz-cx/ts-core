@@ -1,4 +1,4 @@
-// eslint-disable-next-line viz-cx/no-direct-viz-js-lib  -- intentional adapter seam
+// eslint-disable-next-line no-direct-viz-js-lib -- intentional adapter seam
 import vizJs from 'viz-js-lib';
 import type { PublicKey, Wif } from './types';
 import { VizValidationError } from './errors';

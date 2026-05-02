@@ -1,5 +1,5 @@
 import { describe, it, expectTypeOf } from 'vitest';
-import type { OperationMap, OperationName, OperationParams, Operation } from '../../src/ops/registry';
+import type { OperationName, OperationParams, Operation } from '../../src/ops/registry';
 
 describe('operation registry', () => {
   it('exposes curated v1 op shapes', () => {

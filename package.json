@@ -32,7 +32,7 @@
     "test:cov": "vitest run --coverage",
     "test:types": "tsd",
     "test:integration": "vitest run --config vitest.integration.ts",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint . --ext .ts --rulesdir ./eslint-rules",
     "lint:types": "tsc --noEmit",
     "lint:exports": "attw --pack .",
     "size": "node scripts/check-tarball-size.mjs",
