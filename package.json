@@ -34,7 +34,7 @@
     "test:integration": "vitest run --config vitest.integration.ts",
     "lint": "eslint . --ext .ts",
     "lint:types": "tsc --noEmit",
-    "lint:exports": "attw --pack . --profile node16",
+    "lint:exports": "attw --pack .",
     "size": "node scripts/check-tarball-size.mjs",
     "smoke": "node scripts/smoke-test.mjs",
     "prepublishOnly": "pnpm clean && pnpm build && pnpm lint:types && pnpm test && pnpm test:types && pnpm lint:exports && pnpm size",
