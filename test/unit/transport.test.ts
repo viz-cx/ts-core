@@ -39,4 +39,46 @@ describe('createHttpTransport', () => {
     const t = createHttpTransport('https://node.test', { fetch: fetchMock as unknown as typeof fetch });
     await expect(t.call('x', [])).rejects.toBeInstanceOf(VizTransportError);
   });
+
+  it('throws VizTransportError on malformed JSON body', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => { throw new Error('not json'); },
+    });
+    const t = createHttpTransport('https://node.test', { fetch: fetchMock as unknown as typeof fetch });
+    await expect(t.call('x', [])).rejects.toBeInstanceOf(VizTransportError);
+  });
+
+  it('throws VizTransportError on empty result', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ jsonrpc: '2.0', id: 1 }),
+    });
+    const t = createHttpTransport('https://node.test', { fetch: fetchMock as unknown as typeof fetch });
+    await expect(t.call('x', [])).rejects.toBeInstanceOf(VizTransportError);
+  });
+
+  it('broadcast() maps snake_case wire fields to camelCase TransactionResult', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        jsonrpc: '2.0',
+        id: 1,
+        result: { id: 'abc', block_num: 99, expiration: '2026-05-02T00:00:30' },
+      }),
+    });
+    const t = createHttpTransport('https://node.test', { fetch: fetchMock as unknown as typeof fetch });
+    const r = await t.broadcast({
+      refBlockNum: 1,
+      refBlockPrefix: 1,
+      expiration: '2026-05-02T00:00:30',
+      operations: [],
+      extensions: [],
+      signatures: ['sig'],
+    });
+    expect(r).toEqual({ id: 'abc', blockNum: 99, expiration: '2026-05-02T00:00:30' });
+    const [, init] = fetchMock.mock.calls[0]!;
+    const body = JSON.parse((init as RequestInit).body as string);
+    expect(body.method).toBe('network_broadcast_api.broadcast_transaction_synchronous');
+  });
 });

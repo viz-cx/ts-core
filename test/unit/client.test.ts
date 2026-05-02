@@ -33,4 +33,18 @@ describe('createClient', () => {
     expect(typeof c.tx).toBe('function');
     expect(typeof c.broadcast).toBe('function');
   });
+
+  it('curated transfer() injects implicit `from` and broadcasts', async () => {
+    const t = fakeTransport();
+    const wif = (await import('../../src/auth')).keys.fromPassword('alice', 'p4ssw0rd-test-only', 'active');
+    const c = createClient({ account: 'alice', activeKey: wif, transport: t });
+    const r = await c.transfer({ to: 'bob', amount: '1.000 VIZ', memo: '' });
+    expect(r.id).toBe('tx-id');
+    expect(t.broadcast).toHaveBeenCalledOnce();
+    const sentTx = (t.broadcast as ReturnType<typeof vi.fn>).mock.calls[0]![0] as {
+      operations: ReadonlyArray<readonly [string, Record<string, unknown>]>;
+    };
+    expect(sentTx.operations[0]![0]).toBe('transfer');
+    expect(sentTx.operations[0]![1]).toMatchObject({ from: 'alice', to: 'bob', amount: '1.000 VIZ' });
+  });
 });

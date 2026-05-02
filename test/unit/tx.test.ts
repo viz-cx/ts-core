@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createTxBuilder } from '../../src/tx';
+import { createTxBuilder, sign } from '../../src/tx';
+import { keys } from '../../src/auth';
 import type { Transport } from '../../src/transport';
 
 const fakeTransport = (overrides: Partial<Transport> = {}): Transport => ({
@@ -44,5 +45,31 @@ describe('TxBuilder', () => {
   it('rejects empty op list', async () => {
     await expect(createTxBuilder({ transport: fakeTransport(), expirationSec: 30 }).build())
       .rejects.toThrow(/at least one operation/i);
+  });
+
+  it('sign(builder) caches the signature and broadcast() uses transport.broadcast', async () => {
+    const wif = keys.fromPassword('alice', 'p4ssw0rd-test-only', 'active');
+    const t = fakeTransport();
+    const signed = createTxBuilder({ transport: t, expirationSec: 30 })
+      .transfer({ from: 'alice', to: 'bob', amount: '1.000 VIZ', memo: '' })
+      .sign(wif);
+    const tx1 = await signed.toJSON();
+    const tx2 = await signed.toJSON();
+    expect(tx1).toBe(tx2);
+    expect(Array.isArray(tx1.signatures)).toBe(true);
+    expect(tx1.signatures.length).toBe(1);
+    const result = await signed.broadcast();
+    expect(result.id).toBe('txid');
+    expect(t.broadcast).toHaveBeenCalledOnce();
+  });
+
+  it('standalone sign() produces a SignedTransaction', async () => {
+    const wif = keys.fromPassword('alice', 'p4ssw0rd-test-only', 'active');
+    const tx = await createTxBuilder({ transport: fakeTransport(), expirationSec: 30 })
+      .transfer({ from: 'alice', to: 'bob', amount: '1.000 VIZ', memo: '' })
+      .build();
+    const s = await sign(tx, { activeKey: wif });
+    expect(s.signatures.length).toBe(1);
+    expect(s.operations).toEqual(tx.operations);
   });
 });

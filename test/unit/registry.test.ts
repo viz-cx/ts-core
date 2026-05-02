@@ -1,4 +1,5 @@
-import { describe, it, expectTypeOf } from 'vitest';
+import { describe, it, expect, expectTypeOf } from 'vitest';
+import { OP_NAMES } from '../../src/ops/registry';
 import type { OperationName, OperationParams, Operation } from '../../src/ops/registry';
 
 describe('operation registry', () => {
@@ -20,5 +21,15 @@ describe('operation registry', () => {
 
   it('Operation<T> is a tagged 2-tuple', () => {
     expectTypeOf<Operation<'transfer'>>().toMatchTypeOf<readonly ['transfer', OperationParams<'transfer'>]>();
+  });
+
+  it('OP_NAMES contains every curated v1 op', () => {
+    expect(OP_NAMES.length).toBeGreaterThan(40);
+    expect(OP_NAMES).toContain('transfer');
+    expect(OP_NAMES).toContain('award');
+    expect(OP_NAMES).toContain('custom');
+    expect(OP_NAMES).toContain('committee_vote_request');
+    expect(OP_NAMES).toContain('proposal_create');
+    expect(new Set(OP_NAMES).size).toBe(OP_NAMES.length);
   });
 });

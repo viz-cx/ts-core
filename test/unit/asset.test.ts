@@ -51,4 +51,29 @@ describe('Asset', () => {
     expect(Asset.from<'VIZ'>('1.000 VIZ', 'VIZ').amount).toBe(1000n);
     expect(Asset.from<'VIZ'>({ value: '1.000', symbol: 'VIZ' }, 'VIZ').amount).toBe(1000n);
   });
+
+  it('Asset.from rejects symbol mismatch from Asset instance', () => {
+    const a = shares('1.000000');
+    // @ts-expect-error - intentional mismatch for runtime check
+    expect(() => Asset.from<'VIZ'>(a, 'VIZ')).toThrow(VizValidationError);
+  });
+
+  it('Asset.from rejects symbol mismatch from string', () => {
+    expect(() => Asset.from<'VIZ'>('1.000000 SHARES', 'VIZ')).toThrow(VizValidationError);
+  });
+
+  it('Asset.parse rejects non-string input', () => {
+    // @ts-expect-error - intentional non-string for runtime check
+    expect(() => Asset.parse(123)).toThrow(VizValidationError);
+  });
+
+  it('sub() preserves symbol', () => {
+    const r = viz('1.000').sub(viz('0.250'));
+    expect(r.toString()).toBe('0.750 VIZ');
+  });
+
+  it('gt() compares amounts within same symbol', () => {
+    expect(viz('2.000').gt(viz('1.000'))).toBe(true);
+    expect(viz('1.000').gt(viz('1.000'))).toBe(false);
+  });
 });
