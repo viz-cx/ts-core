@@ -6,7 +6,7 @@ import { VizValidationError } from './errors';
 type Role = 'owner' | 'active' | 'regular' | 'memo';
 const ROLES: ReadonlyArray<Role> = ['owner', 'active', 'regular', 'memo'];
 
-export interface KeySet {
+interface KeySet {
   owner: Wif;
   active: Wif;
   regular: Wif;
@@ -89,4 +89,4 @@ function verify(buf: Uint8Array, sig: string, pub: PublicKey | string): boolean 
 }
 
 export const keys = { fromPassword, toPublic, generate, isWif, isPubkey, sign, verify };
-export type { KeySet as KeySetType, Role };
+export type { KeySet, Role };
