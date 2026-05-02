@@ -1,0 +1,17 @@
+src/
+test/
+scripts/
+docs/
+examples/
+.github/
+*.config.ts
+tsconfig.json
+vitest.integration.ts
+.npmrc
+.gitignore
+coverage/
+.pack-tmp/
+*.tgz
+.turbo/
+.cache/
+pnpm-lock.yaml

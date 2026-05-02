@@ -1,0 +1,62 @@
+{
+  "name": "@viz-cx/core",
+  "version": "0.1.0",
+  "description": "Type-safe TypeScript wrapper for viz-js-lib with a default https://node.viz.cx endpoint.",
+  "keywords": ["viz", "viz-blockchain", "blockchain", "typescript", "viz-js-lib"],
+  "homepage": "https://github.com/viz-cx/ts-core#readme",
+  "bugs": "https://github.com/viz-cx/ts-core/issues",
+  "license": "MIT",
+  "author": "babin@axveer.com",
+  "repository": { "type": "git", "url": "git+https://github.com/viz-cx/ts-core.git" },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": { "import": "./dist/index.d.ts", "require": "./dist/index.d.cts" },
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist .pack-tmp coverage",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "test:types": "tsd",
+    "test:integration": "vitest run --config vitest.integration.ts",
+    "lint": "eslint . --ext .ts",
+    "lint:types": "tsc --noEmit",
+    "lint:exports": "attw --pack . --profile node16",
+    "size": "node scripts/check-tarball-size.mjs",
+    "smoke": "node scripts/smoke-test.mjs",
+    "prepublishOnly": "pnpm clean && pnpm build && pnpm lint:types && pnpm test && pnpm test:types && pnpm lint:exports && pnpm size",
+    "release": "changeset publish"
+  },
+  "peerDependencies": {
+    "viz-js-lib": "^0.12"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.15.4",
+    "@changesets/cli": "^2.27.7",
+    "@types/node": "^20.14.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
+    "@vitest/coverage-v8": "^1.6.0",
+    "eslint": "^8.57.0",
+    "tsd": "^0.31.1",
+    "tsup": "^8.1.0",
+    "typescript": "^5.4.5",
+    "viz-js-lib": "^0.12",
+    "vitest": "^1.6.0"
+  },
+  "publishConfig": { "access": "public" },
+  "tsd": { "directory": "test/types" }
+}
