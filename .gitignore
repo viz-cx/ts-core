@@ -10,3 +10,4 @@ coverage/
 !.env.example
 .turbo/
 .cache/
+examples/*/package-lock.json

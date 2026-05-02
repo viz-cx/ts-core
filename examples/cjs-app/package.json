@@ -1,0 +1,9 @@
+{
+  "name": "viz-cx-cjs-smoke",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node index.cjs"
+  },
+  "dependencies": {}
+}
