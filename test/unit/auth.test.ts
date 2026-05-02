@@ -44,13 +44,22 @@ describe('keys', () => {
     ).toThrow(VizValidationError);
   });
 
-  it('sign(buf, wif) returns a hex signature', () => {
+  it('sign(buf, wif) and verify(buf, sig, pub) round-trip', () => {
     const wif = keys.fromPassword('alice', 'p4ssw0rd-test-only', 'active');
+    const pub = keys.toPublic(wif);
     const buf = new Uint8Array(32);
     for (let i = 0; i < 32; i++) buf[i] = i;
     const sig = keys.sign(buf, wif);
     expect(typeof sig).toBe('string');
-    expect(sig.length).toBeGreaterThan(0);
     expect(/^[0-9a-f]+$/i.test(sig)).toBe(true);
+    expect(keys.verify(buf, sig, pub)).toBe(true);
+  });
+
+  it('verify rejects a signature for the wrong key', () => {
+    const wifA = keys.fromPassword('alice', 'p4ssw0rd-test-only', 'active');
+    const wifB = keys.fromPassword('bob', 'different-pw-test', 'active');
+    const buf = new Uint8Array(32).fill(1);
+    const sig = keys.sign(buf, wifA);
+    expect(keys.verify(buf, sig, keys.toPublic(wifB))).toBe(false);
   });
 });

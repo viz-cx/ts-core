@@ -20,7 +20,9 @@ interface VizAuth {
   isPubkey(s: string, prefix?: string): boolean;
   signature: {
     signBuffer(buf: Buffer | Uint8Array, privateKey: unknown): { toBuffer(): Buffer };
-    fromBuffer(buf: Buffer): { verifyBuffer(buf: Buffer | Uint8Array, pubKey: unknown): boolean };
+    fromBuffer(buf: Buffer): {
+      recoverPublicKeyFromBuffer(buf: Buffer | Uint8Array): { toString(): string };
+    };
   };
 }
 
@@ -85,7 +87,8 @@ function sign(buf: Uint8Array, w: Wif | string): string {
 
 function verify(buf: Uint8Array, sig: string, pub: PublicKey | string): boolean {
   const sigObj = auth.signature.fromBuffer(Buffer.from(sig, 'hex'));
-  return sigObj.verifyBuffer(buf, pub);
+  const recovered = sigObj.recoverPublicKeyFromBuffer(buf).toString();
+  return recovered === pub;
 }
 
 export const keys = { fromPassword, toPublic, generate, isWif, isPubkey, sign, verify };

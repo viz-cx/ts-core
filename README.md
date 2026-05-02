@@ -47,7 +47,7 @@ console.log(dgp.head_block_number);
 ```ts
 client.transfer({ to, amount, memo? });
 client.transferToVesting({ to, amount });
-client.withdrawVesting({ amount });
+client.withdrawVesting({ vestingShares });
 client.delegateVestingShares({ delegatee, vestingShares });
 client.accountWitnessVote({ witness, approve });
 client.award({ receiver, energy, customSequence?, memo?, beneficiaries? });

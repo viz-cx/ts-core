@@ -1,5 +1,5 @@
 import { expectType, expectError } from 'tsd';
-import { Asset, viz, shares } from '../../src/index';
+import { type Asset, viz, shares } from '../../src/index';
 
 expectType<Asset<'VIZ'>>(viz('1.000'));
 expectType<Asset<'SHARES'>>(shares('1.000000'));
