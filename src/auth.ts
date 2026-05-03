@@ -1,5 +1,6 @@
 // eslint-disable-next-line no-direct-viz-js-lib -- intentional adapter seam
 import vizJs from 'viz-js-lib';
+import { randomFillSync } from 'node:crypto';
 import type { PublicKey, Wif } from './types';
 import { VizValidationError } from './errors';
 
@@ -64,7 +65,7 @@ function toPublic(w: Wif | string): PublicKey {
 }
 
 function generate(): { wif: Wif; pub: PublicKey } {
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  const bytes = randomFillSync(new Uint8Array(32));
   const seed = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
   const map = auth.getPrivateKeys('seed', seed, ['active']);
   const w = map['active'];
