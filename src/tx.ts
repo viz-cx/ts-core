@@ -28,6 +28,7 @@ export interface TxBuilder {
   delegateVestingShares(p: OperationParams<'delegate_vesting_shares'>): TxBuilder;
   accountWitnessVote(p: OperationParams<'account_witness_vote'>): TxBuilder;
   award(p: OperationParams<'award'>): TxBuilder;
+  fixedAward(p: OperationParams<'fixed_award'>): TxBuilder;
   custom(p: OperationParams<'custom'>): TxBuilder;
   build(): Promise<UnsignedTransaction>;
   sign(key: Wif | string): SignedTxBuilder;
@@ -38,12 +39,13 @@ export interface SignedTxBuilder {
   broadcast(): Promise<TransactionResult>;
 }
 
+// Keyed by camelCase TS field name; value is the expected Asset symbol.
 const ASSET_SYMBOL_FIELDS: Record<string, AssetSymbol> = {
   amount: 'VIZ',
   vestingShares: 'SHARES',
   fee: 'VIZ',
   tokenAmount: 'VIZ',
-  rewardAmount: 'SHARES',
+  rewardAmount: 'VIZ',
   balance: 'VIZ',
   accountOfferPrice: 'VIZ',
   subaccountOfferPrice: 'VIZ',
@@ -52,15 +54,30 @@ const ASSET_SYMBOL_FIELDS: Record<string, AssetSymbol> = {
   requiredAmountMax: 'VIZ',
 };
 
+// Fields that are required in the wire format but optional (or absent) in our TS API.
+const WIRE_DEFAULTS: Record<string, unknown> = {
+  memo: '',
+  custom_sequence: 0,
+  beneficiaries: [],
+};
+
+function toSnakeCase(s: string): string {
+  return s.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
+}
+
 function normalizeParams(params: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(params)) {
+    const wireKey = toSnakeCase(k);
     const sym = ASSET_SYMBOL_FIELDS[k];
     if (sym && (typeof v === 'string' || v instanceof Asset || (v != null && typeof v === 'object' && 'value' in (v as object)))) {
-      out[k] = Asset.from(v as AssetInput, sym).toString();
+      out[wireKey] = Asset.from(v as AssetInput, sym).toString();
     } else {
-      out[k] = v;
+      out[wireKey] = v;
     }
+  }
+  for (const [k, def] of Object.entries(WIRE_DEFAULTS)) {
+    if (out[k] === undefined) out[k] = def;
   }
   return out;
 }
@@ -101,6 +118,7 @@ export function createTxBuilder(opts: TxBuilderOptions): TxBuilder {
     delegateVestingShares:  (p) => builder.op('delegate_vesting_shares', p),
     accountWitnessVote:     (p) => builder.op('account_witness_vote', p),
     award:                  (p) => builder.op('award', p),
+    fixedAward:             (p) => builder.op('fixed_award', p),
     custom:                 (p) => builder.op('custom', p),
 
     async build() {

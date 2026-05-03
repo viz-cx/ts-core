@@ -11,16 +11,8 @@ export interface CuratedClient {
   delegateVestingShares: CuratedMethod<'delegate_vesting_shares', 'delegator'>;
   accountWitnessVote:    CuratedMethod<'account_witness_vote',    'account'>;
   award:                 CuratedMethod<'award',                   'initiator'>;
+  fixedAward:            CuratedMethod<'fixed_award',             'initiator'>;
   custom:                CuratedMethod<'custom',                  never>;
-}
-
-export interface CuratedFieldMap {
-  transfer: 'from';
-  transfer_to_vesting: 'from';
-  withdraw_vesting: 'account';
-  delegate_vesting_shares: 'delegator';
-  account_witness_vote: 'account';
-  award: 'initiator';
 }
 
 export const CURATED_METHOD_TO_OP: Record<keyof CuratedClient, OperationName> = {
@@ -30,6 +22,7 @@ export const CURATED_METHOD_TO_OP: Record<keyof CuratedClient, OperationName> = 
   delegateVestingShares: 'delegate_vesting_shares',
   accountWitnessVote: 'account_witness_vote',
   award: 'award',
+  fixedAward: 'fixed_award',
   custom: 'custom',
 };
 
@@ -40,4 +33,5 @@ export const CURATED_IMPLICIT_FIELD: Partial<Record<keyof CuratedClient, string>
   delegateVestingShares: 'delegator',
   accountWitnessVote: 'account',
   award: 'initiator',
+  fixedAward: 'initiator',
 };
