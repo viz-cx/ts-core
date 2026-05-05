@@ -11,3 +11,4 @@ coverage/
 .turbo/
 .cache/
 examples/*/package-lock.json
+.claude/*

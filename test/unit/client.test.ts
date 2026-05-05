@@ -38,7 +38,7 @@ describe('createClient', () => {
     const t = fakeTransport();
     const wif = (await import('../../src/auth')).keys.fromPassword('alice', 'p4ssw0rd-test-only', 'active');
     const c = createClient({ account: 'alice', activeKey: wif, transport: t });
-    const r = await c.transfer({ to: 'bob', amount: '1.000 VIZ', memo: '' });
+    const r = await c.transfer({ to: 'bob', amount: '1.000 VIZ' });
     expect(r.id).toBe('tx-id');
     expect(t.broadcast).toHaveBeenCalledOnce();
     const sentTx = (t.broadcast as ReturnType<typeof vi.fn>).mock.calls[0]![0] as {
@@ -46,5 +46,22 @@ describe('createClient', () => {
     };
     expect(sentTx.operations[0]![0]).toBe('transfer');
     expect(sentTx.operations[0]![1]).toMatchObject({ from: 'alice', to: 'bob', amount: '1.000 VIZ' });
+  });
+
+  it('curated fixedAward() injects implicit initiator', async () => {
+    const t = fakeTransport();
+    const wif = (await import('../../src/auth')).keys.fromPassword('alice', 'p4ssw0rd-test-only', 'active');
+    const c = createClient({ account: 'alice', activeKey: wif, transport: t });
+    await c.fixedAward({ receiver: 'bob', rewardAmount: '1.000 VIZ', maxEnergy: 500 });
+    const sentTx = (t.broadcast as ReturnType<typeof vi.fn>).mock.calls[0]![0] as {
+      operations: ReadonlyArray<readonly [string, Record<string, unknown>]>;
+    };
+    expect(sentTx.operations[0]![0]).toBe('fixed_award');
+    expect(sentTx.operations[0]![1]).toMatchObject({
+      initiator: 'alice',
+      receiver: 'bob',
+      reward_amount: '1.000 VIZ',
+      max_energy: 500,
+    });
   });
 });

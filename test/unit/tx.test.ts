@@ -51,7 +51,7 @@ describe('TxBuilder', () => {
     const wif = keys.fromPassword('alice', 'p4ssw0rd-test-only', 'active');
     const t = fakeTransport();
     const signed = createTxBuilder({ transport: t, expirationSec: 30 })
-      .transfer({ from: 'alice', to: 'bob', amount: '1.000 VIZ', memo: '' })
+      .transfer({ from: 'alice', to: 'bob', amount: '1.000 VIZ', memo: 'test' })
       .sign(wif);
     const tx1 = await signed.toJSON();
     const tx2 = await signed.toJSON();
@@ -66,10 +66,49 @@ describe('TxBuilder', () => {
   it('standalone sign() produces a SignedTransaction', async () => {
     const wif = keys.fromPassword('alice', 'p4ssw0rd-test-only', 'active');
     const tx = await createTxBuilder({ transport: fakeTransport(), expirationSec: 30 })
-      .transfer({ from: 'alice', to: 'bob', amount: '1.000 VIZ', memo: '' })
+      .transfer({ from: 'alice', to: 'bob', amount: '1.000 VIZ', memo: 'test' })
       .build();
     const s = await sign(tx, { activeKey: wif });
     expect(s.signatures.length).toBe(1);
     expect(s.operations).toEqual(tx.operations);
+  });
+
+  it('normalizeParams converts camelCase keys to snake_case', async () => {
+    const tx = await createTxBuilder({ transport: fakeTransport(), expirationSec: 30 })
+      .delegateVestingShares({ delegator: 'alice', delegatee: 'bob', vestingShares: '1.000000 SHARES' })
+      .build();
+    const params = tx.operations[0]![1] as Record<string, unknown>;
+    expect(params['vesting_shares']).toBe('1.000000 SHARES');
+    expect(params['vestingShares']).toBeUndefined();
+  });
+
+  it('normalizeParams auto-fills memo and custom_sequence defaults', async () => {
+    const tx = await createTxBuilder({ transport: fakeTransport(), expirationSec: 30 })
+      .award({ initiator: 'alice', receiver: 'bob', energy: 100 })
+      .build();
+    const params = tx.operations[0]![1] as Record<string, unknown>;
+    expect(params['memo']).toBe('');
+    expect(params['custom_sequence']).toBe(0);
+    expect(params['beneficiaries']).toEqual([]);
+  });
+
+  it('fixedAward signs and broadcasts successfully', async () => {
+    const wif = keys.fromPassword('alice', 'p4ssw0rd-test-only', 'active');
+    const t = fakeTransport();
+    const result = await createTxBuilder({ transport: t, expirationSec: 30 })
+      .fixedAward({ initiator: 'alice', receiver: 'bob', rewardAmount: '1.000 VIZ', maxEnergy: 500 })
+      .sign(wif)
+      .broadcast();
+    expect(result.id).toBe('txid');
+    const sentTx = (t.broadcast as ReturnType<typeof vi.fn>).mock.calls[0]![0] as {
+      operations: ReadonlyArray<readonly [string, Record<string, unknown>]>;
+    };
+    expect(sentTx.operations[0]![0]).toBe('fixed_award');
+    expect(sentTx.operations[0]![1]).toMatchObject({
+      initiator: 'alice',
+      receiver: 'bob',
+      reward_amount: '1.000 VIZ',
+      max_energy: 500,
+    });
   });
 });

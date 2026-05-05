@@ -202,7 +202,7 @@ export interface OperationMap {
   fixed_award: {
     initiator: AccountName;
     receiver: AccountName;
-    rewardAmount: AssetInput<'SHARES'>;
+    rewardAmount: AssetInput<'VIZ'>;
     maxEnergy: number;
     customSequence?: number;
     memo?: string;
