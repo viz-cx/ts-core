@@ -23,8 +23,8 @@ jobs:
       - run: pnpm lint
       - run: pnpm lint:types
       - run: pnpm test
-      - run: pnpm test:types
       - run: pnpm build
+      - run: pnpm test:types
       - run: pnpm lint:exports
       - run: pnpm size
       - if: matrix.node == 20
