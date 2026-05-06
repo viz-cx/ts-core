@@ -4,8 +4,8 @@ Type-safe TypeScript wrapper for the [VIZ blockchain](https://viz.cx) built on t
 
 `viz-js-lib` ships with no TypeScript types and a positional-argument API. This package closes that gap:
 
-- Named-argument curated methods for the most common operations
-- An `OperationMap` that types every VIZ broadcast operation — including long-tail ops available via the transaction builder
+- Named-argument curated methods for every VIZ broadcast operation
+- An `OperationMap` that types every operation — long-tail ops are also reachable via the transaction builder
 - A `tx().build() → sign() → broadcast()` pipeline for offline signing and hardware wallet integration
 - Dual ESM + CJS publish, under 100 KB, `viz-js-lib` as a peer dependency
 
@@ -41,18 +41,99 @@ console.log(dgp.head_block_number);
 
 The bound account is injected automatically — you only supply the other fields.
 
+**Transfers & vesting**
 ```ts
-client.transfer({ to, amount, memo? });
-client.transferToVesting({ to, amount });
-client.withdrawVesting({ vestingShares });
-client.delegateVestingShares({ delegatee, vestingShares });
-client.accountWitnessVote({ witness, approve });
-client.award({ receiver, energy, customSequence?, memo?, beneficiaries? });
-client.fixedAward({ receiver, rewardAmount, maxEnergy, customSequence?, memo?, beneficiaries? });
-client.custom({ requiredActiveAuths?, requiredRegularAuths?, id, json });
+client.transfer({ to, amount, memo? })
+client.transferToVesting({ to, amount })
+client.withdrawVesting({ vestingShares })
+client.delegateVestingShares({ delegatee, vestingShares })
+client.setWithdrawVestingRoute({ toAccount, percent, autoVest })
 ```
 
-`amount` and `vestingShares` accept a canonical string (`'1.000 VIZ'`, `'1.000000 SHARES'`), an `Asset` object, or `{ value, symbol }`. `energy` and `maxEnergy` are in chain units (100 = 1%).
+**Awards**
+```ts
+client.award({ receiver, energy, customSequence?, memo?, beneficiaries? })
+client.fixedAward({ receiver, rewardAmount, maxEnergy, customSequence?, memo?, beneficiaries? })
+```
+
+**Account management**
+```ts
+client.accountUpdate({ memoKey, master?, active?, regular?, jsonMetadata? })
+client.accountMetadata({ jsonMetadata })
+client.accountCreate({ fee, delegation, newAccountName, master, active, regular, memoKey, jsonMetadata, referrer? })
+client.accountWitnessVote({ witness, approve })
+client.accountWitnessProxy({ proxy })
+```
+
+**Witness & governance**
+```ts
+client.witnessUpdate({ url, blockSigningKey })
+client.chainPropertiesUpdate({ props })
+client.versionedChainPropertiesUpdate({ props })  // props: [typeId, ChainProperties]
+```
+
+**Proposals**
+```ts
+client.proposalCreate({ title, expirationTime, proposedOperations, memo?, reviewPeriodTime? })
+client.proposalUpdate({ title, activeApprovalsToAdd?, activeApprovalsToRemove?,
+                        masterApprovalsToAdd?, masterApprovalsToRemove?,
+                        regularApprovalsToAdd?, regularApprovalsToRemove?,
+                        keyApprovalsToAdd?, keyApprovalsToRemove? })
+client.proposalDelete({ author, title })
+```
+
+**Escrow**
+```ts
+client.escrowTransfer({ to, agent, escrowId, fee, tokenAmount, ratificationDeadline, escrowExpiration, jsonMetadata? })
+client.escrowDispute({ from, to, agent, escrowId })
+client.escrowRelease({ from, to, agent, receiver, escrowId, tokenAmount })
+client.escrowApprove({ from, to, agent, escrowId, approve })
+```
+
+**Committee**
+```ts
+client.committeeWorkerCreateRequest({ url, worker, requiredAmountMin, requiredAmountMax, duration })
+client.committeeWorkerCancelRequest({ requestId })
+client.committeeVoteRequest({ requestId, votePercent })
+```
+
+**Paid subscriptions**
+```ts
+client.paidSubscribe({ account, level, amount, period, autoRenewal })
+client.setPaidSubscription({ url, levels, amount, period })
+```
+
+**Invites**
+```ts
+client.createInvite({ balance, inviteKey })
+client.claimInviteBalance({ receiver, inviteSecret })
+client.inviteRegistration({ newAccountName, inviteSecret, newAccountKey })
+client.useInviteBalance({ receiver, inviteSecret })
+```
+
+**Account recovery**
+```ts
+client.requestAccountRecovery({ accountToRecover, newMasterAuthority })
+client.recoverAccount({ newMasterAuthority, recentMasterAuthority })
+client.changeRecoveryAccount({ newRecoveryAccount })
+```
+
+**Account marketplace**
+```ts
+client.setAccountPrice({ accountSeller, accountOfferPrice, accountOnSale })
+client.setSubaccountPrice({ subaccountSeller, subaccountOfferPrice, subaccountOnSale })
+client.buyAccount({ account, accountOfferPrice, accountAuthoritiesKey, tokensToShares })
+client.targetAccountSale({ accountSeller, targetBuyer, accountOfferPrice, accountOnSale })
+```
+
+**Custom**
+```ts
+client.custom({ requiredActiveAuths?, requiredRegularAuths?, id, json })
+```
+
+Asset fields (`amount`, `vestingShares`, `fee`, etc.) accept a canonical string (`'1.000 VIZ'`, `'1.000000 SHARES'`), an `Asset` object, or `{ value, symbol }`. `energy` and `maxEnergy` are in chain units (100 = 1%).
+
+> **Note on VIZ authority naming**: VIZ uses `master` where Steem/Hive use `owner`. All authority-related fields follow VIZ naming (`master`, `newMasterAuthority`, `masterApprovalsToAdd`, etc.).
 
 ## Transaction builder
 
@@ -76,17 +157,12 @@ await client.tx()
   .broadcast();
 ```
 
-## Long-tail operations
-
-Every VIZ broadcast operation is typed. Reach any operation via `tx().op()`:
+The transaction builder exposes the same methods as the curated client (without implicit injection), plus `op<T>(name, params)` for any typed operation:
 
 ```ts
 await client.tx()
-  .op('committee_vote_request', { voter: 'alice', requestId: 42, voteId: 3 })
-  .op('paid_subscribe', {
-    subscriber: 'alice', author: 'bob',
-    level: 1, amount: '1.000 VIZ', period: 30, autoRenewal: true,
-  })
+  .committeeVoteRequest({ voter: 'alice', requestId: 42, votePercent: 5000 })
+  .op('set_paid_subscription', { account: 'alice', url: 'https://viz.cx', levels: 3, amount: '1.000 VIZ', period: 30 })
   .sign(WIF)
   .broadcast();
 ```
@@ -111,10 +187,10 @@ await client.api.getKeyReferences([pubKey]);
 ```ts
 import { keys } from '@viz-cx/core';
 
-const all   = keys.fromPassword('alice', 'password');         // { owner, active, regular, memo }
+const all   = keys.fromPassword('alice', 'password');          // { owner, active, regular, memo }
 const wif   = keys.fromPassword('alice', 'password', 'active');
 const pub   = keys.toPublic(wif);
-const fresh = keys.generate();                                 // { wif, pub }
+const fresh = keys.generate();                                  // { wif, pub }
 
 keys.isWif(wif);     // type guard
 keys.isPubkey(pub);  // type guard
@@ -156,7 +232,7 @@ All VIZ broadcast operations are typed in `OperationMap`:
 ```
 transfer  transfer_to_vesting  withdraw_vesting  delegate_vesting_shares
 account_witness_vote  award  fixed_award  custom
-vote  content  delete_content  account_update  account_metadata  account_create
+account_update  account_metadata  account_create
 set_withdraw_vesting_route  account_witness_proxy  witness_update
 chain_properties_update  versioned_chain_properties_update
 proposal_create  proposal_update  proposal_delete
@@ -165,7 +241,7 @@ committee_worker_create_request  committee_worker_cancel_request  committee_vote
 paid_subscribe  set_paid_subscription
 create_invite  claim_invite_balance  invite_registration  use_invite_balance
 request_account_recovery  recover_account  change_recovery_account
-fixed_award  set_account_price  set_subaccount_price  buy_account  target_account_sale
+set_account_price  set_subaccount_price  buy_account  target_account_sale
 ```
 
 ```ts
