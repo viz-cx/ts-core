@@ -19,6 +19,24 @@ export interface Authority {
 
 export interface Beneficiary { account: AccountName; weight: number }
 
+// Chain properties passed to chain_properties_update / versioned_chain_properties_update.
+// Asset fields must be pre-formatted strings (e.g. '1.000 VIZ', '1.000000 SHARES')
+// since they are nested and not auto-serialized by the transaction builder.
+export interface ChainProperties {
+  accountCreationFee: string;
+  maximumBlockSize: number;
+  createAccountDelegationRatio: number;
+  createAccountDelegationTime: number;
+  minDelegation: string;
+  minCurationPercent: number;
+  maxCurationPercent: number;
+  bandwidthReservePercent: number;
+  bandwidthReserveBelow: string;
+  flagEnergyAdditionalCost: number;
+  voteAccountingMinRshares: number;
+  committeeRequestApproveMinPercent: number;
+}
+
 export interface Operation<T extends string = string> {
   readonly 0: T;
   readonly 1: Record<string, unknown>;

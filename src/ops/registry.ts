@@ -1,4 +1,4 @@
-import type { AccountName, AssetInput, Authority, Beneficiary, PublicKey } from '../types';
+import type { AccountName, AssetInput, Authority, Beneficiary, ChainProperties, PublicKey } from '../types';
 
 export interface OperationMap {
   // ─── Curated v1 ─────────────────────────────────────────────
@@ -43,37 +43,23 @@ export interface OperationMap {
   };
 
   // ─── Long-tail (typed; reachable via tx().op()) ─────────────
-  vote: {
-    voter: AccountName;
-    author: AccountName;
-    permlink: string;
-    weight: number;
-  };
-  content: {
-    parentAuthor?: AccountName;
-    parentPermlink: string;
-    author: AccountName;
-    permlink: string;
-    title: string;
-    body: string;
-    jsonMetadata?: string;
-    curationPercent?: number;
-  };
-  delete_content: { author: AccountName; permlink: string };
   account_update: {
     account: AccountName;
-    owner?: Authority;
+    // VIZ uses "master" for the owner-level authority (not "owner")
+    master?: Authority;
     active?: Authority;
     regular?: Authority;
-    memoKey?: PublicKey;
+    memoKey: PublicKey;
     jsonMetadata?: string;
   };
   account_metadata: { account: AccountName; jsonMetadata: string };
   account_create: {
     fee: AssetInput<'VIZ'>;
+    delegation: AssetInput<'SHARES'>;
     creator: AccountName;
     newAccountName: AccountName;
-    owner: Authority;
+    // VIZ uses "master" for the owner-level authority (not "owner")
+    master: Authority;
     active: Authority;
     regular: Authority;
     memoKey: PublicKey;
@@ -94,11 +80,12 @@ export interface OperationMap {
   };
   chain_properties_update: {
     owner: AccountName;
-    props: Record<string, unknown>;
+    props: ChainProperties;
   };
+  // props is a static_variant: pass as [typeId, ChainProperties] where typeId 0 = chain_properties_init.
   versioned_chain_properties_update: {
     owner: AccountName;
-    props: { version: number } & Record<string, unknown>;
+    props: readonly [number, ChainProperties];
   };
   proposal_create: {
     author: AccountName;
@@ -113,8 +100,11 @@ export interface OperationMap {
     title: string;
     activeApprovalsToAdd?: AccountName[];
     activeApprovalsToRemove?: AccountName[];
-    ownerApprovalsToAdd?: AccountName[];
-    ownerApprovalsToRemove?: AccountName[];
+    // VIZ uses "master" not "owner" for the owner-level authority approvals
+    masterApprovalsToAdd?: AccountName[];
+    masterApprovalsToRemove?: AccountName[];
+    regularApprovalsToAdd?: AccountName[];
+    regularApprovalsToRemove?: AccountName[];
     keyApprovalsToAdd?: PublicKey[];
     keyApprovalsToRemove?: PublicKey[];
   };
@@ -128,7 +118,7 @@ export interface OperationMap {
     tokenAmount: AssetInput<'VIZ'>;
     ratificationDeadline: string;
     escrowExpiration: string;
-    jsonMeta?: string;
+    jsonMetadata?: string;
   };
   escrow_dispute: {
     from: AccountName;
@@ -157,18 +147,16 @@ export interface OperationMap {
   committee_worker_create_request: {
     creator: AccountName;
     url: string;
-    workerAccount: AccountName;
+    worker: AccountName;
     requiredAmountMin: AssetInput<'VIZ'>;
     requiredAmountMax: AssetInput<'VIZ'>;
-    durationOfPaymentInDays: number;
-    durationOfWorkInDays: number;
-    paymentBeginsInDays: number;
+    duration: number;
   };
   committee_worker_cancel_request: { creator: AccountName; requestId: number };
-  committee_vote_request: { voter: AccountName; requestId: number; voteId: number };
+  committee_vote_request: { voter: AccountName; requestId: number; votePercent: number };
   paid_subscribe: {
     subscriber: AccountName;
-    author: AccountName;
+    account: AccountName;
     level: number;
     amount: AssetInput<'VIZ'>;
     period: number;
@@ -188,12 +176,13 @@ export interface OperationMap {
   request_account_recovery: {
     recoveryAccount: AccountName;
     accountToRecover: AccountName;
-    newOwnerAuthority: Authority;
+    // VIZ uses "master" authority terminology (not "owner")
+    newMasterAuthority: Authority;
   };
   recover_account: {
     accountToRecover: AccountName;
-    newOwnerAuthority: Authority;
-    recentOwnerAuthority: Authority;
+    newMasterAuthority: Authority;
+    recentMasterAuthority: Authority;
   };
   change_recovery_account: {
     accountToRecover: AccountName;
@@ -227,7 +216,13 @@ export interface OperationMap {
     accountAuthoritiesKey: PublicKey;
     tokensToShares: AssetInput<'VIZ'>;
   };
-  target_account_sale: { account: AccountName; targetBuyer: AccountName };
+  target_account_sale: {
+    account: AccountName;
+    accountSeller: AccountName;
+    targetBuyer: AccountName;
+    accountOfferPrice: AssetInput<'VIZ'>;
+    accountOnSale: boolean;
+  };
 }
 
 export type OperationName = keyof OperationMap;
@@ -238,7 +233,6 @@ export type Operation<T extends OperationName = OperationName> =
 export const OP_NAMES: ReadonlyArray<OperationName> = [
   'transfer', 'transfer_to_vesting', 'withdraw_vesting',
   'delegate_vesting_shares', 'account_witness_vote', 'award', 'custom',
-  'vote', 'content', 'delete_content',
   'account_update', 'account_metadata', 'account_create',
   'set_withdraw_vesting_route', 'account_witness_proxy', 'witness_update',
   'chain_properties_update', 'versioned_chain_properties_update',

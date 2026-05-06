@@ -30,6 +30,7 @@ export type {
   AssetInput,
   Authority,
   Beneficiary,
+  ChainProperties,
   Operation,
   UnsignedTransaction,
   SignedTransaction,

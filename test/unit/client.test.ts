@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createClient } from '../../src/client';
 import type { Transport } from '../../src/transport';
+import type { PublicKey } from '../../src/types';
 
 const dgpResponse = { head_block_id: '00000010abcdef1234567890', head_block_number: 16, time: '2026-05-02T00:00:00' };
 
@@ -63,5 +64,44 @@ describe('createClient', () => {
       reward_amount: '1.000 VIZ',
       max_energy: 500,
     });
+  });
+
+  it('curated createInvite() injects implicit creator', async () => {
+    const t = fakeTransport();
+    const auth = (await import('../../src/auth')).keys;
+    const wif = auth.fromPassword('alice', 'p4ssw0rd-test-only', 'active');
+    const inviteKey = auth.toPublic(auth.fromPassword('invite', 'p4ssw0rd-test-only', 'active')) as PublicKey;
+    const c = createClient({ account: 'alice', activeKey: wif, transport: t });
+    await c.createInvite({ balance: '1.000 VIZ', inviteKey });
+    const sentTx = (t.broadcast as ReturnType<typeof vi.fn>).mock.calls[0]![0] as {
+      operations: ReadonlyArray<readonly [string, Record<string, unknown>]>;
+    };
+    expect(sentTx.operations[0]![0]).toBe('create_invite');
+    expect(sentTx.operations[0]![1]).toMatchObject({ creator: 'alice', balance: '1.000 VIZ' });
+  });
+
+  it('all curated methods exist on write client', async () => {
+    const c = createClient({
+      account: 'alice',
+      activeKey: '5JTestActiveKeyDoNotUseInProductionAtAllPleasePromise12',
+      transport: fakeTransport(),
+    });
+    const methods: Array<keyof typeof c> = [
+      'transfer', 'transferToVesting', 'withdrawVesting', 'delegateVestingShares',
+      'accountWitnessVote', 'award', 'fixedAward', 'custom',
+      'accountUpdate', 'accountMetadata', 'accountCreate', 'accountWitnessProxy',
+      'setWithdrawVestingRoute',
+      'witnessUpdate', 'chainPropertiesUpdate', 'versionedChainPropertiesUpdate',
+      'proposalCreate', 'proposalUpdate', 'proposalDelete',
+      'escrowTransfer', 'escrowDispute', 'escrowRelease', 'escrowApprove',
+      'committeeWorkerCreateRequest', 'committeeWorkerCancelRequest', 'committeeVoteRequest',
+      'paidSubscribe', 'setPaidSubscription',
+      'createInvite', 'claimInviteBalance', 'inviteRegistration', 'useInviteBalance',
+      'requestAccountRecovery', 'recoverAccount', 'changeRecoveryAccount',
+      'setAccountPrice', 'setSubaccountPrice', 'buyAccount', 'targetAccountSale',
+    ];
+    for (const m of methods) {
+      expect(typeof c[m], `${m} should be a function`).toBe('function');
+    }
   });
 });

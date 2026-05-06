@@ -16,7 +16,7 @@ describe('operation registry', () => {
   });
 
   it('exposes long-tail ops', () => {
-    expectTypeOf<OperationName>().toMatchTypeOf<'vote' | 'content' | 'proposal_create'>();
+    expectTypeOf<OperationName>().toMatchTypeOf<'account_update' | 'proposal_create'>();
   });
 
   it('Operation<T> is a tagged 2-tuple', () => {
@@ -24,7 +24,7 @@ describe('operation registry', () => {
   });
 
   it('OP_NAMES contains every curated v1 op', () => {
-    expect(OP_NAMES.length).toBeGreaterThan(40);
+    expect(OP_NAMES.length).toBeGreaterThan(35);
     expect(OP_NAMES).toContain('transfer');
     expect(OP_NAMES).toContain('award');
     expect(OP_NAMES).toContain('custom');

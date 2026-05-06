@@ -22,6 +22,7 @@ export interface TxBuilderOptions {
 
 export interface TxBuilder {
   op<T extends OperationName>(name: T, params: OperationParams<T>): TxBuilder;
+  // ─── Hot-path v1 ────────────────────────────────────────────
   transfer(p: OperationParams<'transfer'>): TxBuilder;
   transferToVesting(p: OperationParams<'transfer_to_vesting'>): TxBuilder;
   withdrawVesting(p: OperationParams<'withdraw_vesting'>): TxBuilder;
@@ -30,6 +31,46 @@ export interface TxBuilder {
   award(p: OperationParams<'award'>): TxBuilder;
   fixedAward(p: OperationParams<'fixed_award'>): TxBuilder;
   custom(p: OperationParams<'custom'>): TxBuilder;
+  // ─── Account management ─────────────────────────────────────
+  accountUpdate(p: OperationParams<'account_update'>): TxBuilder;
+  accountMetadata(p: OperationParams<'account_metadata'>): TxBuilder;
+  accountCreate(p: OperationParams<'account_create'>): TxBuilder;
+  accountWitnessProxy(p: OperationParams<'account_witness_proxy'>): TxBuilder;
+  setWithdrawVestingRoute(p: OperationParams<'set_withdraw_vesting_route'>): TxBuilder;
+  // ─── Witness ────────────────────────────────────────────────
+  witnessUpdate(p: OperationParams<'witness_update'>): TxBuilder;
+  chainPropertiesUpdate(p: OperationParams<'chain_properties_update'>): TxBuilder;
+  versionedChainPropertiesUpdate(p: OperationParams<'versioned_chain_properties_update'>): TxBuilder;
+  // ─── Proposals ──────────────────────────────────────────────
+  proposalCreate(p: OperationParams<'proposal_create'>): TxBuilder;
+  proposalUpdate(p: OperationParams<'proposal_update'>): TxBuilder;
+  proposalDelete(p: OperationParams<'proposal_delete'>): TxBuilder;
+  // ─── Escrow ─────────────────────────────────────────────────
+  escrowTransfer(p: OperationParams<'escrow_transfer'>): TxBuilder;
+  escrowDispute(p: OperationParams<'escrow_dispute'>): TxBuilder;
+  escrowRelease(p: OperationParams<'escrow_release'>): TxBuilder;
+  escrowApprove(p: OperationParams<'escrow_approve'>): TxBuilder;
+  // ─── Committee ──────────────────────────────────────────────
+  committeeWorkerCreateRequest(p: OperationParams<'committee_worker_create_request'>): TxBuilder;
+  committeeWorkerCancelRequest(p: OperationParams<'committee_worker_cancel_request'>): TxBuilder;
+  committeeVoteRequest(p: OperationParams<'committee_vote_request'>): TxBuilder;
+  // ─── Subscriptions ──────────────────────────────────────────
+  paidSubscribe(p: OperationParams<'paid_subscribe'>): TxBuilder;
+  setPaidSubscription(p: OperationParams<'set_paid_subscription'>): TxBuilder;
+  // ─── Invites ────────────────────────────────────────────────
+  createInvite(p: OperationParams<'create_invite'>): TxBuilder;
+  claimInviteBalance(p: OperationParams<'claim_invite_balance'>): TxBuilder;
+  inviteRegistration(p: OperationParams<'invite_registration'>): TxBuilder;
+  useInviteBalance(p: OperationParams<'use_invite_balance'>): TxBuilder;
+  // ─── Account recovery ───────────────────────────────────────
+  requestAccountRecovery(p: OperationParams<'request_account_recovery'>): TxBuilder;
+  recoverAccount(p: OperationParams<'recover_account'>): TxBuilder;
+  changeRecoveryAccount(p: OperationParams<'change_recovery_account'>): TxBuilder;
+  // ─── Account marketplace ────────────────────────────────────
+  setAccountPrice(p: OperationParams<'set_account_price'>): TxBuilder;
+  setSubaccountPrice(p: OperationParams<'set_subaccount_price'>): TxBuilder;
+  buyAccount(p: OperationParams<'buy_account'>): TxBuilder;
+  targetAccountSale(p: OperationParams<'target_account_sale'>): TxBuilder;
   build(): Promise<UnsignedTransaction>;
   sign(key: Wif | string): SignedTxBuilder;
 }
@@ -43,6 +84,7 @@ export interface SignedTxBuilder {
 const ASSET_SYMBOL_FIELDS: Record<string, AssetSymbol> = {
   amount: 'VIZ',
   vestingShares: 'SHARES',
+  delegation: 'SHARES',
   fee: 'VIZ',
   tokenAmount: 'VIZ',
   rewardAmount: 'VIZ',
@@ -59,10 +101,32 @@ const WIRE_DEFAULTS: Record<string, unknown> = {
   memo: '',
   custom_sequence: 0,
   beneficiaries: [],
+  json_metadata: '',
+  extensions: [],
+  referrer: '',
 };
 
 function toSnakeCase(s: string): string {
   return s.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
+}
+
+// Recursively converts camelCase keys of plain objects to snake_case.
+// Arrays are mapped element-by-element so that nested objects (e.g. Authority
+// keyAuths tuples, versioned_chain_properties_update props) are also converted,
+// while primitive array elements (strings, numbers) pass through unchanged.
+function deepConvertKeys(v: unknown): unknown {
+  if (v === null || typeof v !== 'object' || v instanceof Asset) {
+    return v;
+  }
+  if (Array.isArray(v)) {
+    return v.map(deepConvertKeys);
+  }
+  const obj = v as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const [k, val] of Object.entries(obj)) {
+    out[toSnakeCase(k)] = deepConvertKeys(val);
+  }
+  return out;
 }
 
 function normalizeParams(params: Record<string, unknown>): Record<string, unknown> {
@@ -73,7 +137,7 @@ function normalizeParams(params: Record<string, unknown>): Record<string, unknow
     if (sym && (typeof v === 'string' || v instanceof Asset || (v != null && typeof v === 'object' && 'value' in (v as object)))) {
       out[wireKey] = Asset.from(v as AssetInput, sym).toString();
     } else {
-      out[wireKey] = v;
+      out[wireKey] = deepConvertKeys(v);
     }
   }
   for (const [k, def] of Object.entries(WIRE_DEFAULTS)) {
@@ -120,6 +184,37 @@ export function createTxBuilder(opts: TxBuilderOptions): TxBuilder {
     award:                  (p) => builder.op('award', p),
     fixedAward:             (p) => builder.op('fixed_award', p),
     custom:                 (p) => builder.op('custom', p),
+    accountUpdate:                  (p) => builder.op('account_update', p),
+    accountMetadata:                (p) => builder.op('account_metadata', p),
+    accountCreate:                  (p) => builder.op('account_create', p),
+    accountWitnessProxy:            (p) => builder.op('account_witness_proxy', p),
+    setWithdrawVestingRoute:        (p) => builder.op('set_withdraw_vesting_route', p),
+    witnessUpdate:                  (p) => builder.op('witness_update', p),
+    chainPropertiesUpdate:          (p) => builder.op('chain_properties_update', p),
+    versionedChainPropertiesUpdate: (p) => builder.op('versioned_chain_properties_update', p),
+    proposalCreate:                 (p) => builder.op('proposal_create', p),
+    proposalUpdate:                 (p) => builder.op('proposal_update', p),
+    proposalDelete:                 (p) => builder.op('proposal_delete', p),
+    escrowTransfer:                 (p) => builder.op('escrow_transfer', p),
+    escrowDispute:                  (p) => builder.op('escrow_dispute', p),
+    escrowRelease:                  (p) => builder.op('escrow_release', p),
+    escrowApprove:                  (p) => builder.op('escrow_approve', p),
+    committeeWorkerCreateRequest:   (p) => builder.op('committee_worker_create_request', p),
+    committeeWorkerCancelRequest:   (p) => builder.op('committee_worker_cancel_request', p),
+    committeeVoteRequest:           (p) => builder.op('committee_vote_request', p),
+    paidSubscribe:                  (p) => builder.op('paid_subscribe', p),
+    setPaidSubscription:            (p) => builder.op('set_paid_subscription', p),
+    createInvite:                   (p) => builder.op('create_invite', p),
+    claimInviteBalance:             (p) => builder.op('claim_invite_balance', p),
+    inviteRegistration:             (p) => builder.op('invite_registration', p),
+    useInviteBalance:               (p) => builder.op('use_invite_balance', p),
+    requestAccountRecovery:         (p) => builder.op('request_account_recovery', p),
+    recoverAccount:                 (p) => builder.op('recover_account', p),
+    changeRecoveryAccount:          (p) => builder.op('change_recovery_account', p),
+    setAccountPrice:                (p) => builder.op('set_account_price', p),
+    setSubaccountPrice:             (p) => builder.op('set_subaccount_price', p),
+    buyAccount:                     (p) => builder.op('buy_account', p),
+    targetAccountSale:              (p) => builder.op('target_account_sale', p),
 
     async build() {
       if (ops.length === 0) {
