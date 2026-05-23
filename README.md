@@ -61,16 +61,19 @@ client.fixedAward({ receiver, rewardAmount, maxEnergy, customSequence?, memo?, b
 client.accountUpdate({ memoKey, master?, active?, regular?, jsonMetadata? })
 client.accountMetadata({ jsonMetadata })
 client.accountCreate({ fee, delegation, newAccountName, master, active, regular, memoKey, jsonMetadata, referrer? })
-client.accountWitnessVote({ witness, approve })
-client.accountWitnessProxy({ proxy })
+client.accountValidatorVote({ validator, approve })   // formerly accountWitnessVote
+client.accountValidatorProxy({ proxy })               // formerly accountWitnessProxy
 ```
 
-**Witness & governance**
+**Validator & governance**
 ```ts
-client.witnessUpdate({ url, blockSigningKey })
+client.validatorUpdate({ url, blockSigningKey })      // formerly witnessUpdate
+client.setRewardSharing({ sharingRate })              // uint16 basis points (0–10000)
 client.chainPropertiesUpdate({ props })
 client.versionedChainPropertiesUpdate({ props })  // props: [typeId, ChainProperties]
 ```
+
+> **Witness → validator migration**: the VIZ blockchain (since hardfork-era viz-cpp-node + viz-js-lib 0.12.4) renamed `witness_*` to `validator_*`. The old curated methods (`accountWitnessVote`, `accountWitnessProxy`, `witnessUpdate`) remain as deprecated aliases that route through the same underlying serializer. New code should use the validator-named methods. Note that even the deprecated `accountWitnessVote` now takes a `validator` field (the upstream serializer no longer accepts `witness`).
 
 **Proposals**
 ```ts
@@ -178,7 +181,8 @@ await client.api.getDynamicGlobalProperties();
 await client.api.getAccounts(['alice', 'bob']);
 await client.api.getBlock(12345);
 await client.api.getAccountHistory('alice', -1, 20);
-await client.api.getActiveWitnesses();
+await client.api.getActiveValidators();          // formerly getActiveWitnesses
+await client.api.getValidatorByAccount('alice'); // formerly getWitnessByAccount
 await client.api.getKeyReferences([pubKey]);
 ```
 
@@ -231,9 +235,13 @@ All VIZ broadcast operations are typed in `OperationMap`:
 
 ```
 transfer  transfer_to_vesting  withdraw_vesting  delegate_vesting_shares
-account_witness_vote  award  fixed_award  custom
+account_validator_vote  account_witness_vote (deprecated alias)
+award  fixed_award  custom
 account_update  account_metadata  account_create
-set_withdraw_vesting_route  account_witness_proxy  witness_update
+set_withdraw_vesting_route
+account_validator_proxy  account_witness_proxy (deprecated alias)
+validator_update  witness_update (deprecated alias)
+set_reward_sharing
 chain_properties_update  versioned_chain_properties_update
 proposal_create  proposal_update  proposal_delete
 escrow_transfer  escrow_dispute  escrow_release  escrow_approve

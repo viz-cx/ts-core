@@ -59,10 +59,18 @@ export interface ReadApi {
   getAccountHistory(name: AccountName | string, from: number, limit: number): Promise<Array<readonly [number, AccountHistoryItem]>>;
   getOpsInBlock(blockNum: number, onlyVirtual: boolean): Promise<AccountHistoryItem[]>;
   getKeyReferences(keys: string[]): Promise<string[][]>;
+  getValidatorByAccount(account: AccountName | string): Promise<unknown>;
+  getActiveValidators(): Promise<string[]>;
+  /** @deprecated Prefer {@link ReadApi.getValidatorByAccount}. */
   getWitnessByAccount(account: AccountName | string): Promise<unknown>;
+  /** @deprecated Prefer {@link ReadApi.getActiveValidators}. */
   getActiveWitnesses(): Promise<string[]>;
 }
 
+// As of viz-cpp-node's witness→validator migration the API namespace is
+// `validator_api`. Old `witness_*` method names remain as server-side aliases
+// for one release cycle; we route both new and deprecated client methods
+// through the new namespace so users hit a single working code path.
 export function createReadApi(t: Transport): ReadApi {
   return {
     getDynamicGlobalProperties: () => t.call('database_api.get_dynamic_global_properties', []),
@@ -73,7 +81,9 @@ export function createReadApi(t: Transport): ReadApi {
     getAccountHistory:          (n, from, limit) => t.call('account_history.get_account_history', [n, from, limit]),
     getOpsInBlock:              (n, onlyVirtual) => t.call('operation_history.get_ops_in_block', [n, onlyVirtual]),
     getKeyReferences:           (keys) => t.call('account_by_key.get_key_references', [keys]),
-    getWitnessByAccount:        (a) => t.call('witness_api.get_witness_by_account', [a]),
-    getActiveWitnesses:         () => t.call('witness_api.get_active_witnesses', []),
+    getValidatorByAccount:      (a) => t.call('validator_api.get_validator_by_account', [a]),
+    getActiveValidators:        () => t.call('validator_api.get_active_validators', []),
+    getWitnessByAccount:        (a) => t.call('validator_api.get_witness_by_account', [a]),
+    getActiveWitnesses:         () => t.call('validator_api.get_active_witnesses', []),
   };
 }

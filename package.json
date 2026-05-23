@@ -1,6 +1,6 @@
 {
   "name": "@viz-cx/core",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Type-safe TypeScript wrapper for viz-js-lib with a default https://node.viz.cx endpoint.",
   "keywords": [
     "viz",
@@ -59,7 +59,7 @@
     "release": "changeset publish"
   },
   "peerDependencies": {
-    "viz-js-lib": "^0.12"
+    "viz-js-lib": "^0.12.6"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.15.4",
@@ -72,8 +72,8 @@
     "tsd": "^0.31.1",
     "tsup": "^8.1.0",
     "typescript": "^5.4.5",
-    "viz-js-lib": "^0.12",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "viz-js-lib": "^0.12.6"
   },
   "publishConfig": {
     "access": "public"

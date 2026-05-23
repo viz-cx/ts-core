@@ -10,7 +10,13 @@ export interface CuratedClient {
   transferToVesting:     CuratedMethod<'transfer_to_vesting',     'from'>;
   withdrawVesting:       CuratedMethod<'withdraw_vesting',        'account'>;
   delegateVestingShares: CuratedMethod<'delegate_vesting_shares', 'delegator'>;
+  /**
+   * @deprecated Prefer {@link CuratedClient.accountValidatorVote}. As of viz-js-lib
+   * 0.12.4 this routes through the `account_validator_vote` serializer and the wire
+   * field is `validator` (already reflected in the args type).
+   */
   accountWitnessVote:    CuratedMethod<'account_witness_vote',    'account'>;
+  accountValidatorVote:  CuratedMethod<'account_validator_vote',  'account'>;
   award:                 CuratedMethod<'award',                   'initiator'>;
   fixedAward:            CuratedMethod<'fixed_award',             'initiator'>;
   custom:                CuratedMethod<'custom',                  never>;
@@ -19,13 +25,18 @@ export interface CuratedClient {
   accountUpdate:         CuratedMethod<'account_update',          'account'>;
   accountMetadata:       CuratedMethod<'account_metadata',        'account'>;
   accountCreate:         CuratedMethod<'account_create',          'creator'>;
+  /** @deprecated Prefer {@link CuratedClient.accountValidatorProxy}. */
   accountWitnessProxy:   CuratedMethod<'account_witness_proxy',   'account'>;
+  accountValidatorProxy: CuratedMethod<'account_validator_proxy', 'account'>;
 
   // ─── Vesting routes ─────────────────────────────────────────
   setWithdrawVestingRoute: CuratedMethod<'set_withdraw_vesting_route', 'fromAccount'>;
 
-  // ─── Witness ────────────────────────────────────────────────
+  // ─── Witness / Validator ────────────────────────────────────
+  /** @deprecated Prefer {@link CuratedClient.validatorUpdate}. */
   witnessUpdate:                   CuratedMethod<'witness_update',                    'owner'>;
+  validatorUpdate:                 CuratedMethod<'validator_update',                  'owner'>;
+  setRewardSharing:                CuratedMethod<'set_reward_sharing',                'owner'>;
   chainPropertiesUpdate:           CuratedMethod<'chain_properties_update',           'owner'>;
   versionedChainPropertiesUpdate:  CuratedMethod<'versioned_chain_properties_update', 'owner'>;
 
@@ -73,6 +84,7 @@ export const CURATED_METHOD_TO_OP: Record<keyof CuratedClient, OperationName> = 
   withdrawVesting: 'withdraw_vesting',
   delegateVestingShares: 'delegate_vesting_shares',
   accountWitnessVote: 'account_witness_vote',
+  accountValidatorVote: 'account_validator_vote',
   award: 'award',
   fixedAward: 'fixed_award',
   custom: 'custom',
@@ -80,8 +92,11 @@ export const CURATED_METHOD_TO_OP: Record<keyof CuratedClient, OperationName> = 
   accountMetadata: 'account_metadata',
   accountCreate: 'account_create',
   accountWitnessProxy: 'account_witness_proxy',
+  accountValidatorProxy: 'account_validator_proxy',
   setWithdrawVestingRoute: 'set_withdraw_vesting_route',
   witnessUpdate: 'witness_update',
+  validatorUpdate: 'validator_update',
+  setRewardSharing: 'set_reward_sharing',
   chainPropertiesUpdate: 'chain_properties_update',
   versionedChainPropertiesUpdate: 'versioned_chain_properties_update',
   proposalCreate: 'proposal_create',
@@ -115,14 +130,18 @@ export const CURATED_IMPLICIT_FIELD: Partial<Record<keyof CuratedClient, string>
   withdrawVesting: 'account',
   delegateVestingShares: 'delegator',
   accountWitnessVote: 'account',
+  accountValidatorVote: 'account',
   award: 'initiator',
   fixedAward: 'initiator',
   accountUpdate: 'account',
   accountMetadata: 'account',
   accountCreate: 'creator',
   accountWitnessProxy: 'account',
+  accountValidatorProxy: 'account',
   setWithdrawVestingRoute: 'fromAccount',
   witnessUpdate: 'owner',
+  validatorUpdate: 'owner',
+  setRewardSharing: 'owner',
   chainPropertiesUpdate: 'owner',
   versionedChainPropertiesUpdate: 'owner',
   proposalCreate: 'author',

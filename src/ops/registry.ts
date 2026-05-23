@@ -22,10 +22,25 @@ export interface OperationMap {
     delegatee: AccountName;
     vestingShares: AssetInput<'SHARES'>;
   };
+  /**
+   * @deprecated Since viz-js-lib 0.12.4 this op-name is an alias for
+   * `account_validator_vote`; the wire field is `validator`, not `witness`.
+   * Prefer {@link OperationMap.account_validator_vote}.
+   */
   account_witness_vote: {
     account: AccountName;
-    witness: AccountName;
+    validator: AccountName;
     approve: boolean;
+  };
+  account_validator_vote: {
+    account: AccountName;
+    validator: AccountName;
+    approve: boolean;
+  };
+  account_validator_proxy: { account: AccountName; proxy: AccountName | '' };
+  set_reward_sharing: {
+    owner: AccountName;
+    sharingRate: number;
   };
   award: {
     initiator: AccountName;
@@ -73,7 +88,16 @@ export interface OperationMap {
     autoVest: boolean;
   };
   account_witness_proxy: { account: AccountName; proxy: AccountName | '' };
+  /**
+   * @deprecated Since viz-js-lib 0.12.4 this op-name is an alias for
+   * `validator_update`. Prefer {@link OperationMap.validator_update}.
+   */
   witness_update: {
+    owner: AccountName;
+    url: string;
+    blockSigningKey: PublicKey;
+  };
+  validator_update: {
     owner: AccountName;
     url: string;
     blockSigningKey: PublicKey;
@@ -232,9 +256,12 @@ export type Operation<T extends OperationName = OperationName> =
 
 export const OP_NAMES: ReadonlyArray<OperationName> = [
   'transfer', 'transfer_to_vesting', 'withdraw_vesting',
-  'delegate_vesting_shares', 'account_witness_vote', 'award', 'custom',
+  'delegate_vesting_shares', 'account_witness_vote', 'account_validator_vote',
+  'award', 'custom',
   'account_update', 'account_metadata', 'account_create',
-  'set_withdraw_vesting_route', 'account_witness_proxy', 'witness_update',
+  'set_withdraw_vesting_route',
+  'account_witness_proxy', 'account_validator_proxy',
+  'witness_update', 'validator_update',
   'chain_properties_update', 'versioned_chain_properties_update',
   'proposal_create', 'proposal_update', 'proposal_delete',
   'escrow_transfer', 'escrow_dispute', 'escrow_release', 'escrow_approve',
@@ -243,4 +270,5 @@ export const OP_NAMES: ReadonlyArray<OperationName> = [
   'create_invite', 'claim_invite_balance', 'invite_registration', 'use_invite_balance',
   'request_account_recovery', 'recover_account', 'change_recovery_account',
   'fixed_award', 'set_account_price', 'set_subaccount_price', 'buy_account', 'target_account_sale',
+  'set_reward_sharing',
 ];

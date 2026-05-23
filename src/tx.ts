@@ -27,7 +27,9 @@ export interface TxBuilder {
   transferToVesting(p: OperationParams<'transfer_to_vesting'>): TxBuilder;
   withdrawVesting(p: OperationParams<'withdraw_vesting'>): TxBuilder;
   delegateVestingShares(p: OperationParams<'delegate_vesting_shares'>): TxBuilder;
+  /** @deprecated Prefer {@link TxBuilder.accountValidatorVote}. */
   accountWitnessVote(p: OperationParams<'account_witness_vote'>): TxBuilder;
+  accountValidatorVote(p: OperationParams<'account_validator_vote'>): TxBuilder;
   award(p: OperationParams<'award'>): TxBuilder;
   fixedAward(p: OperationParams<'fixed_award'>): TxBuilder;
   custom(p: OperationParams<'custom'>): TxBuilder;
@@ -35,10 +37,15 @@ export interface TxBuilder {
   accountUpdate(p: OperationParams<'account_update'>): TxBuilder;
   accountMetadata(p: OperationParams<'account_metadata'>): TxBuilder;
   accountCreate(p: OperationParams<'account_create'>): TxBuilder;
+  /** @deprecated Prefer {@link TxBuilder.accountValidatorProxy}. */
   accountWitnessProxy(p: OperationParams<'account_witness_proxy'>): TxBuilder;
+  accountValidatorProxy(p: OperationParams<'account_validator_proxy'>): TxBuilder;
   setWithdrawVestingRoute(p: OperationParams<'set_withdraw_vesting_route'>): TxBuilder;
-  // ─── Witness ────────────────────────────────────────────────
+  // ─── Witness / Validator ────────────────────────────────────
+  /** @deprecated Prefer {@link TxBuilder.validatorUpdate}. */
   witnessUpdate(p: OperationParams<'witness_update'>): TxBuilder;
+  validatorUpdate(p: OperationParams<'validator_update'>): TxBuilder;
+  setRewardSharing(p: OperationParams<'set_reward_sharing'>): TxBuilder;
   chainPropertiesUpdate(p: OperationParams<'chain_properties_update'>): TxBuilder;
   versionedChainPropertiesUpdate(p: OperationParams<'versioned_chain_properties_update'>): TxBuilder;
   // ─── Proposals ──────────────────────────────────────────────
@@ -181,6 +188,7 @@ export function createTxBuilder(opts: TxBuilderOptions): TxBuilder {
     withdrawVesting:        (p) => builder.op('withdraw_vesting', p),
     delegateVestingShares:  (p) => builder.op('delegate_vesting_shares', p),
     accountWitnessVote:     (p) => builder.op('account_witness_vote', p),
+    accountValidatorVote:   (p) => builder.op('account_validator_vote', p),
     award:                  (p) => builder.op('award', p),
     fixedAward:             (p) => builder.op('fixed_award', p),
     custom:                 (p) => builder.op('custom', p),
@@ -188,8 +196,11 @@ export function createTxBuilder(opts: TxBuilderOptions): TxBuilder {
     accountMetadata:                (p) => builder.op('account_metadata', p),
     accountCreate:                  (p) => builder.op('account_create', p),
     accountWitnessProxy:            (p) => builder.op('account_witness_proxy', p),
+    accountValidatorProxy:          (p) => builder.op('account_validator_proxy', p),
     setWithdrawVestingRoute:        (p) => builder.op('set_withdraw_vesting_route', p),
     witnessUpdate:                  (p) => builder.op('witness_update', p),
+    validatorUpdate:                (p) => builder.op('validator_update', p),
+    setRewardSharing:               (p) => builder.op('set_reward_sharing', p),
     chainPropertiesUpdate:          (p) => builder.op('chain_properties_update', p),
     versionedChainPropertiesUpdate: (p) => builder.op('versioned_chain_properties_update', p),
     proposalCreate:                 (p) => builder.op('proposal_create', p),

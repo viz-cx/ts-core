@@ -35,6 +35,12 @@ export interface ChainProperties {
   flagEnergyAdditionalCost: number;
   voteAccountingMinRshares: number;
   committeeRequestApproveMinPercent: number;
+  // Validator-renamed hardfork governance params (witness_* → validator_*).
+  // Optional because they only apply to chain_properties_hf4 / hf6 / hf9 variants.
+  inflationValidatorPercent?: number;
+  validatorMissPenaltyPercent?: number;
+  validatorMissPenaltyDuration?: number;
+  validatorDeclarationFee?: string;
 }
 
 export interface Operation<T extends string = string> {

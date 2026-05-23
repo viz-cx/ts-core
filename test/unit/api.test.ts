@@ -37,14 +37,24 @@ describe('ReadApi', () => {
     await api.getAccountHistory('alice', -1, 100);
     await api.getOpsInBlock(7, false);
     await api.getKeyReferences(['VIZkey']);
-    await api.getWitnessByAccount('alice');
-    await api.getActiveWitnesses();
+    await api.getValidatorByAccount('alice');
+    await api.getActiveValidators();
     expect(call).toHaveBeenNthCalledWith(1, 'database_api.lookup_account_names', [['alice']]);
     expect(call).toHaveBeenNthCalledWith(2, 'database_api.get_block_header', [42]);
     expect(call).toHaveBeenNthCalledWith(3, 'account_history.get_account_history', ['alice', -1, 100]);
     expect(call).toHaveBeenNthCalledWith(4, 'operation_history.get_ops_in_block', [7, false]);
     expect(call).toHaveBeenNthCalledWith(5, 'account_by_key.get_key_references', [['VIZkey']]);
-    expect(call).toHaveBeenNthCalledWith(6, 'witness_api.get_witness_by_account', ['alice']);
-    expect(call).toHaveBeenNthCalledWith(7, 'witness_api.get_active_witnesses', []);
+    expect(call).toHaveBeenNthCalledWith(6, 'validator_api.get_validator_by_account', ['alice']);
+    expect(call).toHaveBeenNthCalledWith(7, 'validator_api.get_active_validators', []);
+  });
+
+  it('deprecated witness aliases route through validator_api namespace', async () => {
+    const call = vi.fn().mockResolvedValue(null);
+    const t: Transport = { call, broadcast: vi.fn() };
+    const api = createReadApi(t);
+    await api.getWitnessByAccount('alice');
+    await api.getActiveWitnesses();
+    expect(call).toHaveBeenNthCalledWith(1, 'validator_api.get_witness_by_account', ['alice']);
+    expect(call).toHaveBeenNthCalledWith(2, 'validator_api.get_active_witnesses', []);
   });
 });

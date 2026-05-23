@@ -181,21 +181,54 @@ describe('curated methods', () => {
 
   // ─── Witness / governance ───────────────────────────────────────────────────
 
-  describe('accountWitnessVote', () => {
-    it('injects `account`', async () => {
-      const [op, p] = await send('accountWitnessVote', { witness: 'bob', approve: true });
+  describe('accountWitnessVote (deprecated alias)', () => {
+    it('injects `account`, uses validator field (witness_* op is aliased to account_validator_vote)', async () => {
+      const [op, p] = await send('accountWitnessVote', { validator: 'bob', approve: true });
       expect(op).toBe('account_witness_vote');
-      expect(p).toMatchObject({ account: 'alice', witness: 'bob', approve: true });
+      expect(p).toMatchObject({ account: 'alice', validator: 'bob', approve: true });
     });
   });
 
-  describe('witnessUpdate', () => {
+  describe('accountValidatorVote', () => {
+    it('injects `account`, validator field passes through', async () => {
+      const [op, p] = await send('accountValidatorVote', { validator: 'bob', approve: true });
+      expect(op).toBe('account_validator_vote');
+      expect(p).toMatchObject({ account: 'alice', validator: 'bob', approve: true });
+    });
+  });
+
+  describe('accountValidatorProxy', () => {
+    it('injects `account`', async () => {
+      const [op, p] = await send('accountValidatorProxy', { proxy: 'bob' });
+      expect(op).toBe('account_validator_proxy');
+      expect(p).toMatchObject({ account: 'alice', proxy: 'bob' });
+    });
+  });
+
+  describe('witnessUpdate (deprecated alias)', () => {
     it('injects `owner`, snake-cases block_signing_key', async () => {
       const [op, p] = await send('witnessUpdate', { url: 'https://viz.cx', blockSigningKey: PUB });
       expect(op).toBe('witness_update');
       expect(p).toMatchObject({ owner: 'alice', url: 'https://viz.cx', block_signing_key: PUB });
     });
   });
+
+  describe('validatorUpdate', () => {
+    it('injects `owner`, snake-cases block_signing_key', async () => {
+      const [op, p] = await send('validatorUpdate', { url: 'https://viz.cx', blockSigningKey: PUB });
+      expect(op).toBe('validator_update');
+      expect(p).toMatchObject({ owner: 'alice', url: 'https://viz.cx', block_signing_key: PUB });
+    });
+  });
+
+  describe('setRewardSharing', () => {
+    it('injects `owner`, snake-cases sharing_rate', async () => {
+      const [op, p] = await send('setRewardSharing', { sharingRate: 5000 });
+      expect(op).toBe('set_reward_sharing');
+      expect(p).toMatchObject({ owner: 'alice', sharing_rate: 5000 });
+    });
+  });
+
 
   describe('chainPropertiesUpdate', () => {
     it('injects `owner`, deep-converts ChainProperties keys', async () => {
