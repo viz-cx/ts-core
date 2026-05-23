@@ -259,6 +259,10 @@ type TransferParams = OperationParams<'transfer'>;
 // → { from: AccountName; to: AccountName; amount: AssetInput<'VIZ'>; memo?: string }
 ```
 
+## Contributing
+
+See [`AGENTS.md`](./AGENTS.md) for repo conventions, commands, and the release flow (the same file orients both human contributors and AI coding agents).
+
 ## License
 
 MIT
