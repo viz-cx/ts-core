@@ -9,6 +9,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
@@ -17,7 +18,8 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-          registry-url: https://registry.npmjs.org/
+      - name: Upgrade npm for OIDC Trusted Publisher support
+        run: npm install -g npm@latest
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - uses: changesets/action@v1
@@ -28,9 +30,7 @@ jobs:
           CURRENT=$(node -p "require('./package.json').version")
           PUBLISHED=$(npm view @viz-cx/core version 2>/dev/null || echo "none")
           if [ "$CURRENT" != "$PUBLISHED" ]; then
-            npm publish --access public
+            npm publish --access public --provenance
           else
             echo "Version $CURRENT already on npm, skipping"
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
