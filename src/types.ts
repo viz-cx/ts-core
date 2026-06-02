@@ -67,13 +67,18 @@ export interface TransactionResult {
   expiration: string;
 }
 
-const ACCOUNT_RE = /^[a-z][a-z0-9-]{1,14}[a-z0-9](?:\.[a-z][a-z0-9-]{1,14}[a-z0-9])*$/;
+// Mirrors viz-cpp-node's is_valid_account_name: total length 2-32
+// (CHAIN_MIN/MAX_ACCOUNT_NAME_LENGTH), dot-separated segments of >= 2 chars,
+// each segment starting with [a-z], ending [a-z0-9], with [a-z0-9-] in between.
+// (Creating a *new* account additionally requires >= 3 chars, but names like
+// "id" already exist on-chain and must validate.)
+const ACCOUNT_RE = /^[a-z][a-z0-9-]*[a-z0-9](?:\.[a-z][a-z0-9-]*[a-z0-9])*$/;
 
 export function account(s: string): AccountName {
-  if (typeof s !== 'string' || s.length < 3 || s.length > 16 || !ACCOUNT_RE.test(s)) {
+  if (typeof s !== 'string' || s.length < 2 || s.length > 32 || !ACCOUNT_RE.test(s)) {
     throw new VizValidationError({
       field: 'account',
-      expected: 'lowercase 3-16 chars, alnum + dashes, starts/ends alnum, dot-separated segments',
+      expected: 'lowercase 2-32 chars, alnum + dashes, each dot segment starts with a letter and ends alphanumeric',
       received: s,
     });
   }
