@@ -15,8 +15,9 @@ describe('createHttpTransport', () => {
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('https://node.test');
     const body = JSON.parse((init as RequestInit).body as string);
-    expect(body.method).toBe('database_api.get_dynamic_global_properties');
-    expect(body.params).toEqual([]);
+    // viz-cpp-node only accepts the legacy "call" envelope: params = [api, method, args].
+    expect(body.method).toBe('call');
+    expect(body.params).toEqual(['database_api', 'get_dynamic_global_properties', []]);
   });
 
   it('throws VizRpcError when result has error payload', async () => {
@@ -79,6 +80,8 @@ describe('createHttpTransport', () => {
     expect(r).toEqual({ id: 'abc', blockNum: 99, expiration: '2026-05-02T00:00:30' });
     const [, init] = fetchMock.mock.calls[0]!;
     const body = JSON.parse((init as RequestInit).body as string);
-    expect(body.method).toBe('network_broadcast_api.broadcast_transaction_synchronous');
+    expect(body.method).toBe('call');
+    expect(body.params[0]).toBe('network_broadcast_api');
+    expect(body.params[1]).toBe('broadcast_transaction_synchronous');
   });
 });

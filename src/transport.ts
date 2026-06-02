@@ -27,12 +27,19 @@ export function createHttpTransport(endpoint: string, opts: HttpTransportOptions
     const id = nextId++;
     const ac = new AbortController();
     const timer = setTimeout(() => ac.abort(), timeoutMs);
+    // viz-cpp-node's json_rpc plugin only reads request params when the top-level
+    // method is the legacy "call" wrapper, with params = [api, method, args]. Its
+    // appbase-style `api.method` path splits the dotted name but never reads the
+    // `params` field, so it always tries to cast `{}` to an array and fails with
+    // "Bad Cast: Invalid cast from object_type to Array". Always use the wrapper.
+    const dot = method.indexOf('.');
+    const wireParams = dot === -1 ? [method, '', params] : [method.slice(0, dot), method.slice(dot + 1), params];
     let res: Response;
     try {
       res = await fetchFn(endpoint, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ jsonrpc: '2.0', id, method, params }),
+        body: JSON.stringify({ jsonrpc: '2.0', id, method: 'call', params: wireParams }),
         signal: ac.signal,
       });
     } catch (e) {
