@@ -83,5 +83,15 @@ describe('createHttpTransport', () => {
     expect(body.method).toBe('call');
     expect(body.params[0]).toBe('network_broadcast_api');
     expect(body.params[1]).toBe('broadcast_transaction_synchronous');
+    // The broadcast payload must use snake_case TaPoS field names: the node
+    // parses the tx by these names to recompute the signed digest. Sending
+    // camelCase makes the node read ref_block_num/ref_block_prefix as 0 and
+    // reject the signature as missing authority.
+    const tx = body.params[2][0];
+    expect(tx.ref_block_num).toBe(1);
+    expect(tx.ref_block_prefix).toBe(1);
+    expect(tx).not.toHaveProperty('refBlockNum');
+    expect(tx).not.toHaveProperty('refBlockPrefix');
+    expect(tx.signatures).toEqual(['sig']);
   });
 });

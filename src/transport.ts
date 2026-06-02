@@ -76,9 +76,22 @@ export function createHttpTransport(endpoint: string, opts: HttpTransportOptions
   }
 
   async function broadcast(signed: SignedTransaction): Promise<TransactionResult> {
+    // The signature is computed over the snake_case wire shape (ref_block_num /
+    // ref_block_prefix). The node parses incoming transactions by those exact
+    // field names, so the broadcast payload must use them too -- otherwise the
+    // node reads ref_block_num/ref_block_prefix as 0, derives a different digest
+    // than the one that was signed, and rejects the tx as missing authority.
+    const wire = {
+      ref_block_num: signed.refBlockNum,
+      ref_block_prefix: signed.refBlockPrefix,
+      expiration: signed.expiration,
+      operations: signed.operations,
+      extensions: signed.extensions,
+      signatures: signed.signatures,
+    };
     const r = await call<{ id: string; block_num: number; expiration: string }>(
       'network_broadcast_api.broadcast_transaction_synchronous',
-      [signed],
+      [wire],
     );
     return { id: r.id, blockNum: r.block_num, expiration: r.expiration };
   }
