@@ -59,7 +59,7 @@
     "release": "changeset publish"
   },
   "peerDependencies": {
-    "viz-js-lib": "^0.12.6"
+    "viz-js-lib": "^0.12.7"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.15.4",
@@ -73,7 +73,7 @@
     "tsup": "^8.1.0",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0",
-    "viz-js-lib": "^0.12.6"
+    "viz-js-lib": "^0.12.7"
   },
   "publishConfig": {
     "access": "public"
