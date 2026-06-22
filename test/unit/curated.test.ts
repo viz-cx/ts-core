@@ -37,7 +37,7 @@ const CHAIN_PROPS: ChainProperties = {
   maximumBlockSize: 65536,
   createAccountDelegationRatio: 10,
   createAccountDelegationTime: 2592000,
-  minDelegation: '1.000000 SHARES',
+  minDelegation: '1.000 VIZ',
   minCurationPercent: 0,
   maxCurationPercent: 10000,
   bandwidthReservePercent: 1000,
@@ -45,6 +45,24 @@ const CHAIN_PROPS: ChainProperties = {
   flagEnergyAdditionalCost: 0,
   voteAccountingMinRshares: 5000000,
   committeeRequestApproveMinPercent: 1000,
+};
+
+const CHAIN_PROPS_HF13: ChainProperties = {
+  ...CHAIN_PROPS,
+  inflationValidatorPercent: 2000,
+  inflationRatioCommitteeVsRewardFund: 5000,
+  inflationRecalcPeriod: 806400,
+  dataOperationsCostAdditionalBandwidth: 0,
+  validatorMissPenaltyPercent: 100,
+  validatorMissPenaltyDuration: 86400,
+  createInviteMinBalance: '10.000 VIZ',
+  committeeCreateRequestFee: '100.000 VIZ',
+  createPaidSubscriptionFee: '100.000 VIZ',
+  accountOnSaleFee: '10.000 VIZ',
+  subaccountOnSaleFee: '100.000 VIZ',
+  validatorDeclarationFee: '10.000 VIZ',
+  withdrawIntervals: 28,
+  distributionEpochLength: 28800,
 };
 
 async function send(method: keyof VizClient, args: Record<string, unknown>) {
@@ -239,7 +257,7 @@ describe('curated methods', () => {
         props: {
           account_creation_fee: '1.000 VIZ',
           maximum_block_size: 65536,
-          min_delegation: '1.000000 SHARES',
+          min_delegation: '1.000 VIZ',
         },
       });
     });
@@ -252,6 +270,28 @@ describe('curated methods', () => {
       expect(p).toMatchObject({
         owner: 'alice',
         props: [0, { account_creation_fee: '1.000 VIZ', maximum_block_size: 65536 }],
+      });
+    });
+
+    it('serializes the full hf13 props set (typeId 4) with all 26 fields snake_cased', async () => {
+      const [op, p] = await send('versionedChainPropertiesUpdate', {
+        props: [4, CHAIN_PROPS_HF13],
+      });
+      expect(op).toBe('versioned_chain_properties_update');
+      expect(p).toMatchObject({
+        owner: 'alice',
+        props: [
+          4,
+          {
+            account_creation_fee: '1.000 VIZ',
+            min_delegation: '1.000 VIZ',
+            inflation_ratio_committee_vs_reward_fund: 5000,
+            data_operations_cost_additional_bandwidth: 0,
+            create_invite_min_balance: '10.000 VIZ',
+            withdraw_intervals: 28,
+            distribution_epoch_length: 28800,
+          },
+        ],
       });
     });
   });
