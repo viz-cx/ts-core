@@ -21,7 +21,10 @@ This file orients Claude Code, Codex, Cursor, and any other AI coding agent work
 | Smoke test against live node | `pnpm smoke` |
 | Pre-publish gate | `pnpm prepublishOnly` |
 
-Use **pnpm**, not npm — lockfile is `pnpm-lock.yaml`.
+Use **pnpm**, not npm — lockfile is `pnpm-lock.yaml`. Repo config lives in `pnpm-workspace.yaml`:
+
+- `allowBuilds` gates which dependency build scripts run (pnpm ≥10 blocks them by default): `esbuild: true` (needed by tsup), `core-js: false`.
+- `minimumReleaseAgeExclude` whitelists a package@version past the global `minimumReleaseAge` cooldown — currently `viz-js-lib@0.12.7`, so a freshly published peer-dep version installs without waiting out the supply-chain delay. Add the next pinned `viz-js-lib@x.y.z` here when bumping the peer dep.
 
 ## Source layout
 
@@ -39,7 +42,7 @@ src/
   types.ts          branded types (AccountName, PublicKey, Wif), ChainProperties
   viz-js-lib.d.ts   ambient module declaration for the untyped peer dep
   ops/
-    registry.ts     single source of truth for OperationMap — 42 broadcast ops
+    registry.ts     single source of truth for OperationMap — 43 op-names (40 ops + 3 deprecated witness_* aliases)
     curated.ts      named-arg curated methods, implicit-field injection map
     raw.ts          op('name', params) escape hatch
 

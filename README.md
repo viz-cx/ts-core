@@ -73,7 +73,17 @@ client.chainPropertiesUpdate({ props })
 client.versionedChainPropertiesUpdate({ props })  // props: [typeId, ChainProperties]
 ```
 
-> **Witness → validator migration**: the VIZ blockchain (since hardfork-era viz-cpp-node + viz-js-lib 0.12.4) renamed `witness_*` to `validator_*`. The old curated methods (`accountWitnessVote`, `accountWitnessProxy`, `witnessUpdate`) remain as deprecated aliases that route through the same underlying serializer. New code should use the validator-named methods. Note that even the deprecated `accountWitnessVote` now takes a `validator` field (the upstream serializer no longer accepts `witness`).
+For `versionedChainPropertiesUpdate`, the `typeId` is the `static_variant` index for the active hardfork — import `HF13_PROPS_VERSION` (= 4) rather than hard-coding it:
+
+```ts
+import { HF13_PROPS_VERSION } from '@viz-cx/core';
+
+client.versionedChainPropertiesUpdate({ props: [HF13_PROPS_VERSION, chainProps] });
+```
+
+`ChainProperties` models the full `chain_properties_hf13` shape (26 fields).
+
+> **Witness → validator migration**: the VIZ blockchain (since hardfork-era viz-cpp-node + viz-js-lib 0.12.6) renamed `witness_*` to `validator_*`. The old curated methods (`accountWitnessVote`, `accountWitnessProxy`, `witnessUpdate`) remain as deprecated aliases that route through the same underlying serializer. New code should use the validator-named methods. Note that even the deprecated `accountWitnessVote` now takes a `validator` field (the upstream serializer no longer accepts `witness`).
 
 **Proposals**
 ```ts
