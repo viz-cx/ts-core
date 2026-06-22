@@ -22,6 +22,13 @@ export interface Beneficiary { account: AccountName; weight: number }
 // Chain properties passed to chain_properties_update / versioned_chain_properties_update.
 // Asset fields must be pre-formatted strings (e.g. '1.000 VIZ', '1.000000 SHARES')
 // since they are nested and not auto-serialized by the transaction builder.
+//
+// The 12 fields below are chain_properties_init — the only shape the legacy,
+// non-versioned chain_properties_update op serializes. Everything after is
+// optional because it only exists on chain_properties_hf4/hf6/hf9/hf13, which
+// versioned_chain_properties_update (static_variant index HF13_PROPS_VERSION)
+// is the only way to submit. Verified against viz-cpp-node's
+// libraries/protocol/include/graphene/protocol/chain_operations.hpp:356-628.
 export interface ChainProperties {
   accountCreationFee: string;
   maximumBlockSize: number;
@@ -35,13 +42,32 @@ export interface ChainProperties {
   flagEnergyAdditionalCost: number;
   voteAccountingMinRshares: number;
   committeeRequestApproveMinPercent: number;
-  // Validator-renamed hardfork governance params (witness_* → validator_*).
-  // Optional because they only apply to chain_properties_hf4 / hf6 / hf9 variants.
+  // hf4
   inflationValidatorPercent?: number;
+  inflationRatioCommitteeVsRewardFund?: number;
+  inflationRecalcPeriod?: number;
+  // hf6
+  dataOperationsCostAdditionalBandwidth?: number;
   validatorMissPenaltyPercent?: number;
   validatorMissPenaltyDuration?: number;
+  // hf9
+  createInviteMinBalance?: string;
+  committeeCreateRequestFee?: string;
+  createPaidSubscriptionFee?: string;
+  accountOnSaleFee?: string;
+  subaccountOnSaleFee?: string;
   validatorDeclarationFee?: string;
+  withdrawIntervals?: number;
+  // hf13
+  distributionEpochLength?: number;
 }
+
+/**
+ * static_variant index selecting chain_properties_hf13 in
+ * versioned_chain_properties_update. The variant order (init=0, hf4=1, hf6=2,
+ * hf9=3, hf13=4) is fixed by the chain's protocol definition.
+ */
+export const HF13_PROPS_VERSION = 4;
 
 export interface Operation<T extends string = string> {
   readonly 0: T;

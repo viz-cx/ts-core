@@ -22,6 +22,7 @@ export { createHttpTransport } from './transport';
 export type { Transport, HttpTransportOptions } from './transport';
 
 export { account, publicKey, wif } from './types';
+export { HF13_PROPS_VERSION } from './types';
 export type {
   AccountName,
   PublicKey,
