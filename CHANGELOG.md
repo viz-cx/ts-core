@@ -1,5 +1,19 @@
 # @viz-cx/core
 
+## 0.6.1
+
+### Patch Changes
+
+- 4dabc70: Bump `vitest` and `@vitest/coverage-v8` from `^1.6.0` to `^3.2.6`, resolving the critical Dependabot advisory (Vitest UI server arbitrary file read/exec, GHSA fixed in 3.2.6). Dev-dependency only — no change to the published surface.
+
+  All gates pass under vitest 3: lint, typecheck, 106/106 unit tests, tsd, attw exports, tarball size. Coverage config: excluded ambient `.d.ts` files and recalibrated the `functions` threshold (vitest 3's v8 provider counts inner closures/arrows as uncovered even when their lines run, so lines/statements/branches remain the meaningful gates at 98%/98%/92%).
+
+  The low-severity esbuild advisory (dev-server file read on Windows, transitively via `tsup`) is intentionally not addressed here: the patched esbuild `0.28.1` is outside tsup 8.5.1's declared `^0.27.0` range, and the vector (dev server on Windows) does not apply to this repo's Linux CI / `vitest run` usage. Revisit once tsup widens its esbuild range.
+
+- 268010b: Track `viz-js-lib` 0.12.7. Bump the peer/dev dependency from `^0.12.6` to `^0.12.7`.
+
+  Upstream 0.12.7 removes long-deprecated social/content API methods (`get_content`, `get_blog*`, `get_follow*`, `get_discussions_by_*`, `get_vesting_delegations`, `lookup_accounts`, …) and moves `babel-preset-env`/`cross-env` out of runtime `dependencies` into `devDependencies`. None of the removed methods are referenced by `@viz-cx/core`'s API surface, so this is a clean version track with no behavior change. The build, type, exports, and tarball-size gates all pass against 0.12.7, and the dependency cleanup drops ~80 transitive babel/cross-env packages from installs.
+
 ## 0.6.0
 
 ### Minor Changes
