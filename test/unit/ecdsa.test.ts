@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sha256 } from '@noble/hashes/sha256';
+import { sha256 } from '@noble/hashes/sha2';
 import { deriveWif, wifToPublic } from '../../src/crypto/keys';
 import { signDigest, recoverPubkey } from '../../src/crypto/ecdsa';
 

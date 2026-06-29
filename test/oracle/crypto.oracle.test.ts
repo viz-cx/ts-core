@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import vizJs from 'viz-js-lib';
 import { deriveWif, wifToPublic, isWif, isPubkey } from '../../src/crypto/keys';
 import { signDigest, recoverPubkey } from '../../src/crypto/ecdsa';
-import { sha256 } from '@noble/hashes/sha256';
+import { sha256 } from '@noble/hashes/sha2';
 
 const auth = (vizJs as any).auth;
 const ACCOUNT = 'alice';
