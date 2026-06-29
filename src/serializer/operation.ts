@@ -68,7 +68,8 @@ function writeField(w: ByteWriter, type: FieldType, v: unknown): void {
     case 'uint16': w.uint16(Number(v)); break;
     case 'uint32': w.uint32(Number(v)); break;
     case 'int16': w.int16(Number(v)); break;
-    case 'int64': w.int64(BigInt(v as number | string | bigint)); break;
+    case 'int64': w.int64(BigInt((v as number | string | bigint | undefined) ?? 0n)); break;
+    case 'uint64': w.int64(BigInt.asUintN(64, BigInt((v as number | string | bigint | undefined) ?? 0n))); break;
     case 'varint': w.varint32(Number(v)); break;
     case 'time': w.time(String(v)); break;
     case 'extensions': w.varint32(0); break; // empty set
@@ -78,6 +79,16 @@ function writeField(w: ByteWriter, type: FieldType, v: unknown): void {
     case 'pubkey[]':
       w.vector((v as string[]) ?? [], (ww, s) => ww.pubkey(s));
       break;
+    case 'string-set': {
+      const sortedStrings = [...((v as string[]) ?? [])].sort();
+      w.vector(sortedStrings, (ww, s) => ww.string(s));
+      break;
+    }
+    case 'pubkey-set': {
+      const sortedPubkeys = [...((v as string[]) ?? [])].sort();
+      w.vector(sortedPubkeys, (ww, key) => ww.pubkey(key));
+      break;
+    }
     case 'optional-string':
       w.optional(v == null ? undefined : String(v), (ww, s) => ww.string(s));
       break;

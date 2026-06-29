@@ -1,10 +1,11 @@
 export type FieldType =
   | 'string' | 'asset' | 'authority' | 'pubkey' | 'bool'
-  | 'uint8' | 'uint16' | 'uint32' | 'int16' | 'int64' | 'varint' | 'time'
-  | 'string[]' | 'optional-string' | 'optional-time'
+  | 'uint8' | 'uint16' | 'uint32' | 'int16' | 'int64' | 'uint64' | 'varint' | 'time'
+  | 'string[]' | 'string-set' | 'optional-string' | 'optional-time'
+  | 'pubkey[]' | 'pubkey-set'
   | 'optional-authority' | 'optional-pubkey'
   | 'beneficiaries' | 'chain_properties' | 'versioned_chain_props'
-  | 'operations_array' | 'pubkey[]' | 'extensions';
+  | 'operations_array' | 'extensions';
 
 // Field ORDER and TYPE transcribed verbatim from
 // node_modules/viz-js-lib/lib/auth/serializer/src/operations.js.
@@ -25,8 +26,8 @@ export const OP_SCHEMA: Record<string, ReadonlyArray<readonly [string, FieldType
   account_validator_vote: [['account','string'],['validator','string'],['approve','bool']],
   account_validator_proxy: [['account','string'],['proxy','string']],
   custom: [
-    ['required_active_auths','string[]'],
-    ['required_regular_auths','string[]'],
+    ['required_active_auths','string-set'],
+    ['required_regular_auths','string-set'],
     ['id','string'],
     ['json','string'],
   ],
@@ -77,10 +78,10 @@ export const OP_SCHEMA: Record<string, ReadonlyArray<readonly [string, FieldType
   ],
   proposal_update: [
     ['author','string'],['title','string'],
-    ['active_approvals_to_add','string[]'],['active_approvals_to_remove','string[]'],
-    ['master_approvals_to_add','string[]'],['master_approvals_to_remove','string[]'],
-    ['regular_approvals_to_add','string[]'],['regular_approvals_to_remove','string[]'],
-    ['key_approvals_to_add','pubkey[]'],['key_approvals_to_remove','pubkey[]'],
+    ['active_approvals_to_add','string-set'],['active_approvals_to_remove','string-set'],
+    ['master_approvals_to_add','string-set'],['master_approvals_to_remove','string-set'],
+    ['regular_approvals_to_add','string-set'],['regular_approvals_to_remove','string-set'],
+    ['key_approvals_to_add','pubkey-set'],['key_approvals_to_remove','pubkey-set'],
     ['extensions','extensions'],
   ],
   proposal_delete: [
@@ -102,7 +103,7 @@ export const OP_SCHEMA: Record<string, ReadonlyArray<readonly [string, FieldType
   versioned_chain_properties_update: [['owner','string'],['props','versioned_chain_props']],
   award: [
     ['initiator','string'],['receiver','string'],['energy','uint16'],
-    ['custom_sequence','int64'],['memo','string'],['beneficiaries','beneficiaries'],
+    ['custom_sequence','uint64'],['memo','string'],['beneficiaries','beneficiaries'],
   ],
   set_paid_subscription: [
     ['account','string'],['url','string'],['levels','uint16'],['amount','asset'],['period','uint16'],
@@ -124,7 +125,7 @@ export const OP_SCHEMA: Record<string, ReadonlyArray<readonly [string, FieldType
   use_invite_balance: [['initiator','string'],['receiver','string'],['invite_secret','string']],
   fixed_award: [
     ['initiator','string'],['receiver','string'],['reward_amount','asset'],['max_energy','uint16'],
-    ['custom_sequence','int64'],['memo','string'],['beneficiaries','beneficiaries'],
+    ['custom_sequence','uint64'],['memo','string'],['beneficiaries','beneficiaries'],
   ],
   target_account_sale: [
     ['account','string'],['account_seller','string'],['target_buyer','string'],

@@ -220,3 +220,41 @@ it('has a schema + type id for every registered op', () => {
     expect(OP_TYPE_IDS[name as string], `type id for ${name}`).toBeDefined();
   }
 });
+
+it('serializes proposal_update with multiple approvals sorted', () => {
+  const sample = {
+    author: 'alice', title: 'test',
+    active_approvals_to_add: ['charlie', 'alice'],  // unsorted — should be alice, charlie
+    active_approvals_to_remove: [],
+    master_approvals_to_add: [],
+    master_approvals_to_remove: [],
+    regular_approvals_to_add: [],
+    regular_approvals_to_remove: [],
+    key_approvals_to_add: [],
+    key_approvals_to_remove: [],
+    extensions: [],
+  };
+  const w = new ByteWriter();
+  writeOperation(w, 'proposal_update', sample);
+  const ByteBuffer = require('bytebuffer');
+  const b = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN);
+  ops.operation.appendByteBuffer(b, ['proposal_update', sample]);
+  const expected = Buffer.from((b.copy(0, b.offset) as { toBuffer: () => Buffer }).toBuffer()).toString('hex');
+  expect(w.hex()).toBe(expected);
+});
+
+it('serializes custom op with multiple required_active_auths sorted', () => {
+  const sample = {
+    required_active_auths: ['zebra', 'alice', 'mike'],  // unsorted — should sort ascending
+    required_regular_auths: [],
+    id: 'test',
+    json: '{}',
+  };
+  const w = new ByteWriter();
+  writeOperation(w, 'custom', sample);
+  const ByteBuffer = require('bytebuffer');
+  const b = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN);
+  ops.operation.appendByteBuffer(b, ['custom', sample]);
+  const expected = Buffer.from((b.copy(0, b.offset) as { toBuffer: () => Buffer }).toBuffer()).toString('hex');
+  expect(w.hex()).toBe(expected);
+});
