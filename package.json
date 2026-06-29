@@ -58,9 +58,6 @@
     "prepublishOnly": "pnpm clean && pnpm build && pnpm lint:types && pnpm test && pnpm test:types && pnpm lint:exports && pnpm size",
     "release": "changeset publish"
   },
-  "peerDependencies": {
-    "viz-js-lib": "^0.12.7"
-  },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.15.4",
     "@changesets/cli": "^2.27.7",
@@ -80,5 +77,9 @@
   },
   "tsd": {
     "directory": "test/types"
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.8.0",
+    "@noble/secp256k1": "^2.3.0"
   }
 }
