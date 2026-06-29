@@ -22,14 +22,8 @@ const { CHAIN_ID } = await import(resolve(root, 'src/constants.ts'));
 const { signDigest, recoverPubkey } = await import(resolve(root, 'src/crypto/ecdsa.ts'));
 const { deriveWif, wifToPublic } = await import(resolve(root, 'src/crypto/keys.ts'));
 
-// Representative subset of operation samples (no viz-js-lib dependency).
-const SAMPLES = {
-  transfer: { from: 'alice', to: 'bob', amount: '1.000 VIZ', memo: '' },
-  award: { initiator: 'alice', receiver: 'bob', energy: 50, custom_sequence: 0, memo: '', beneficiaries: [] },
-  custom: { required_active_auths: [], required_regular_auths: ['alice'], id: 'x', json: '{}' },
-  account_metadata: { account: 'alice', json_metadata: '{}' },
-  set_reward_sharing: { owner: 'alice', sharing_rate: 1000 },
-};
+// Full operation samples shared with the serializer oracle test.
+const { SAMPLES } = await import(resolve(root, 'test/oracle/samples.mjs'));
 
 // --- Serialize ops ---
 const opsOut = [];

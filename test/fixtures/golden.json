@@ -6,21 +6,81 @@
         "from": "alice",
         "to": "bob",
         "amount": "1.000 VIZ",
-        "memo": ""
+        "memo": "hi"
       },
-      "hex": "0205616c69636503626f62e8030000000000000356495a0000000000"
+      "hex": "0205616c69636503626f62e8030000000000000356495a00000000026869"
     },
     {
-      "name": "award",
+      "name": "transfer_to_vesting",
       "sample": {
-        "initiator": "alice",
-        "receiver": "bob",
-        "energy": 50,
-        "custom_sequence": 0,
-        "memo": "",
-        "beneficiaries": []
+        "from": "alice",
+        "to": "bob",
+        "amount": "2.000 VIZ"
       },
-      "hex": "2f05616c69636503626f62320000000000000000000000"
+      "hex": "0305616c69636503626f62d0070000000000000356495a00000000"
+    },
+    {
+      "name": "withdraw_vesting",
+      "sample": {
+        "account": "alice",
+        "vesting_shares": "3.000000 SHARES"
+      },
+      "hex": "0405616c696365c0c62d00000000000653484152455300"
+    },
+    {
+      "name": "account_update",
+      "sample": {
+        "account": "alice",
+        "master": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R",
+              1
+            ]
+          ]
+        },
+        "active": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R",
+              1
+            ]
+          ]
+        },
+        "memo_key": "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R",
+        "json_metadata": ""
+      },
+      "hex": "0505616c6963650101000000000103a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc01000101000000000103a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc01000003a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc00"
+    },
+    {
+      "name": "validator_update",
+      "sample": {
+        "owner": "alice",
+        "url": "https://viz.cx",
+        "block_signing_key": "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R"
+      },
+      "hex": "0605616c6963650e68747470733a2f2f76697a2e637803a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc"
+    },
+    {
+      "name": "account_validator_vote",
+      "sample": {
+        "account": "alice",
+        "validator": "bob",
+        "approve": true
+      },
+      "hex": "0705616c69636503626f6201"
+    },
+    {
+      "name": "account_validator_proxy",
+      "sample": {
+        "account": "alice",
+        "proxy": "bob"
+      },
+      "hex": "0805616c69636503626f62"
     },
     {
       "name": "custom",
@@ -35,20 +95,482 @@
       "hex": "0a000105616c6963650178027b7d"
     },
     {
+      "name": "set_withdraw_vesting_route",
+      "sample": {
+        "from_account": "alice",
+        "to_account": "bob",
+        "percent": 5000,
+        "auto_vest": false
+      },
+      "hex": "0b05616c69636503626f62881300"
+    },
+    {
+      "name": "request_account_recovery",
+      "sample": {
+        "recovery_account": "alice",
+        "account_to_recover": "bob",
+        "new_master_authority": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R",
+              1
+            ]
+          ]
+        },
+        "extensions": []
+      },
+      "hex": "0c05616c69636503626f6201000000000103a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc010000"
+    },
+    {
+      "name": "recover_account",
+      "sample": {
+        "account_to_recover": "alice",
+        "new_master_authority": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R",
+              1
+            ]
+          ]
+        },
+        "recent_master_authority": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R",
+              1
+            ]
+          ]
+        },
+        "extensions": []
+      },
+      "hex": "0d05616c69636501000000000103a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc010001000000000103a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc010000"
+    },
+    {
+      "name": "change_recovery_account",
+      "sample": {
+        "account_to_recover": "alice",
+        "new_recovery_account": "bob",
+        "extensions": []
+      },
+      "hex": "0e05616c69636503626f6200"
+    },
+    {
+      "name": "escrow_transfer",
+      "sample": {
+        "from": "alice",
+        "to": "bob",
+        "token_amount": "1.000 VIZ",
+        "escrow_id": 1,
+        "agent": "carol",
+        "fee": "0.010 VIZ",
+        "json_metadata": "",
+        "ratification_deadline": "2026-12-31T00:00:00",
+        "escrow_expiration": "2027-01-31T00:00:00"
+      },
+      "hex": "0f05616c69636503626f62e8030000000000000356495a0000000001000000056361726f6c0a000000000000000356495a0000000000009b356b80795e6b"
+    },
+    {
+      "name": "escrow_dispute",
+      "sample": {
+        "from": "alice",
+        "to": "bob",
+        "agent": "carol",
+        "who": "alice",
+        "escrow_id": 1
+      },
+      "hex": "1005616c69636503626f62056361726f6c05616c69636501000000"
+    },
+    {
+      "name": "escrow_release",
+      "sample": {
+        "from": "alice",
+        "to": "bob",
+        "agent": "carol",
+        "who": "alice",
+        "receiver": "bob",
+        "escrow_id": 1,
+        "token_amount": "1.000 VIZ"
+      },
+      "hex": "1105616c69636503626f62056361726f6c05616c69636503626f6201000000e8030000000000000356495a00000000"
+    },
+    {
+      "name": "escrow_approve",
+      "sample": {
+        "from": "alice",
+        "to": "bob",
+        "agent": "carol",
+        "who": "alice",
+        "escrow_id": 1,
+        "approve": true
+      },
+      "hex": "1205616c69636503626f62056361726f6c05616c6963650100000001"
+    },
+    {
+      "name": "delegate_vesting_shares",
+      "sample": {
+        "delegator": "alice",
+        "delegatee": "bob",
+        "vesting_shares": "100.000000 SHARES"
+      },
+      "hex": "1305616c69636503626f6200e1f505000000000653484152455300"
+    },
+    {
+      "name": "account_create",
+      "sample": {
+        "fee": "0.000 VIZ",
+        "delegation": "0.000000 SHARES",
+        "creator": "alice",
+        "new_account_name": "newuser",
+        "master": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R",
+              1
+            ]
+          ]
+        },
+        "active": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R",
+              1
+            ]
+          ]
+        },
+        "regular": {
+          "weight_threshold": 1,
+          "account_auths": [],
+          "key_auths": [
+            [
+              "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R",
+              1
+            ]
+          ]
+        },
+        "memo_key": "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R",
+        "json_metadata": "",
+        "referrer": "",
+        "extensions": []
+      },
+      "hex": "1400000000000000000356495a000000000000000000000000065348415245530005616c696365076e65777573657201000000000103a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc010001000000000103a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc010001000000000103a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc010003a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc000000"
+    },
+    {
       "name": "account_metadata",
       "sample": {
         "account": "alice",
-        "json_metadata": "{}"
+        "json_metadata": "{\"profile\":{}}"
       },
-      "hex": "1505616c696365027b7d"
+      "hex": "1505616c6963650e7b2270726f66696c65223a7b7d7d"
+    },
+    {
+      "name": "proposal_create",
+      "sample": {
+        "author": "alice",
+        "title": "test",
+        "memo": "",
+        "expiration_time": "2026-12-31T00:00:00",
+        "proposed_operations": [
+          {
+            "op": [
+              "transfer",
+              {
+                "from": "alice",
+                "to": "bob",
+                "amount": "1.000 VIZ",
+                "memo": ""
+              }
+            ]
+          }
+        ],
+        "extensions": []
+      },
+      "hex": "1605616c696365047465737400009b356b010205616c69636503626f62e8030000000000000356495a00000000000000"
+    },
+    {
+      "name": "proposal_update",
+      "sample": {
+        "author": "alice",
+        "title": "test",
+        "active_approvals_to_add": [],
+        "active_approvals_to_remove": [],
+        "master_approvals_to_add": [],
+        "master_approvals_to_remove": [],
+        "regular_approvals_to_add": [],
+        "regular_approvals_to_remove": [],
+        "key_approvals_to_add": [],
+        "key_approvals_to_remove": [],
+        "extensions": []
+      },
+      "hex": "1705616c6963650474657374000000000000000000"
+    },
+    {
+      "name": "proposal_delete",
+      "sample": {
+        "author": "alice",
+        "title": "test",
+        "requester": "alice",
+        "extensions": []
+      },
+      "hex": "1805616c696365047465737405616c69636500"
+    },
+    {
+      "name": "chain_properties_update",
+      "sample": {
+        "owner": "alice",
+        "props": {
+          "account_creation_fee": "1.000 VIZ",
+          "maximum_block_size": 65536,
+          "create_account_delegation_ratio": 10,
+          "create_account_delegation_time": 2592000,
+          "min_delegation": "1.000000 SHARES",
+          "min_curation_percent": 0,
+          "max_curation_percent": 10000,
+          "bandwidth_reserve_percent": 100,
+          "bandwidth_reserve_below": "30.000000 SHARES",
+          "flag_energy_additional_cost": 1000,
+          "vote_accounting_min_rshares": 5000000,
+          "committee_request_approve_min_percent": 1000
+        }
+      },
+      "hex": "1905616c696365e8030000000000000356495a00000000000001000a000000008d270040420f0000000000065348415245530000001027640080c3c901000000000653484152455300e803404b4c00e803"
+    },
+    {
+      "name": "committee_worker_create_request",
+      "sample": {
+        "creator": "alice",
+        "url": "https://viz.cx/request",
+        "worker": "bob",
+        "required_amount_min": "100.000 VIZ",
+        "required_amount_max": "1000.000 VIZ",
+        "duration": 2592000
+      },
+      "hex": "2305616c6963651668747470733a2f2f76697a2e63782f7265717565737403626f62a0860100000000000356495a0000000040420f00000000000356495a00000000008d2700"
+    },
+    {
+      "name": "committee_worker_cancel_request",
+      "sample": {
+        "creator": "alice",
+        "request_id": 42
+      },
+      "hex": "2405616c6963652a000000"
+    },
+    {
+      "name": "committee_vote_request",
+      "sample": {
+        "voter": "alice",
+        "request_id": 42,
+        "vote_percent": 5000
+      },
+      "hex": "2505616c6963652a0000008813"
+    },
+    {
+      "name": "create_invite",
+      "sample": {
+        "creator": "alice",
+        "balance": "1.000 VIZ",
+        "invite_key": "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R"
+      },
+      "hex": "2b05616c696365e8030000000000000356495a0000000003a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc"
+    },
+    {
+      "name": "claim_invite_balance",
+      "sample": {
+        "initiator": "alice",
+        "receiver": "bob",
+        "invite_secret": "secret123"
+      },
+      "hex": "2c05616c69636503626f6209736563726574313233"
+    },
+    {
+      "name": "invite_registration",
+      "sample": {
+        "initiator": "alice",
+        "new_account_name": "newuser",
+        "invite_secret": "secret123",
+        "new_account_key": "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R"
+      },
+      "hex": "2d05616c696365076e6577757365720973656372657431323303a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc"
+    },
+    {
+      "name": "versioned_chain_properties_update",
+      "sample": {
+        "owner": "alice",
+        "props": [
+          4,
+          {
+            "account_creation_fee": "1.000 VIZ",
+            "maximum_block_size": 65536,
+            "create_account_delegation_ratio": 10,
+            "create_account_delegation_time": 2592000,
+            "min_delegation": "1.000000 SHARES",
+            "min_curation_percent": 0,
+            "max_curation_percent": 10000,
+            "bandwidth_reserve_percent": 100,
+            "bandwidth_reserve_below": "30.000000 SHARES",
+            "flag_energy_additional_cost": 1000,
+            "vote_accounting_min_rshares": 5000000,
+            "committee_request_approve_min_percent": 1000,
+            "inflation_validator_percent": 1000,
+            "inflation_ratio_committee_vs_reward_fund": 3000,
+            "inflation_recalc_period": 262800,
+            "data_operations_cost_additional_bandwidth": 0,
+            "validator_miss_penalty_percent": 100,
+            "validator_miss_penalty_duration": 86400,
+            "create_invite_min_balance": "1.000 VIZ",
+            "committee_create_request_fee": "1.000 VIZ",
+            "create_paid_subscription_fee": "1.000 VIZ",
+            "account_on_sale_fee": "10.000 VIZ",
+            "subaccount_on_sale_fee": "1.000 VIZ",
+            "validator_declaration_fee": "1.000 VIZ",
+            "withdraw_intervals": 104,
+            "distribution_epoch_length": 28800
+          }
+        ]
+      },
+      "hex": "2e05616c69636504e8030000000000000356495a00000000000001000a000000008d270040420f0000000000065348415245530000001027640080c3c901000000000653484152455300e803404b4c00e803e803b80b9002040000000000640080510100e8030000000000000356495a00000000e8030000000000000356495a00000000e8030000000000000356495a0000000010270000000000000356495a00000000e8030000000000000356495a00000000e8030000000000000356495a00000000680080700000"
+    },
+    {
+      "name": "award",
+      "sample": {
+        "initiator": "alice",
+        "receiver": "bob",
+        "energy": 50,
+        "custom_sequence": 0,
+        "memo": "",
+        "beneficiaries": []
+      },
+      "hex": "2f05616c69636503626f62320000000000000000000000"
+    },
+    {
+      "name": "fixed_award",
+      "sample": {
+        "initiator": "alice",
+        "receiver": "bob",
+        "reward_amount": "1.000 VIZ",
+        "max_energy": 10000,
+        "custom_sequence": 0,
+        "memo": "",
+        "beneficiaries": []
+      },
+      "hex": "3c05616c69636503626f62e8030000000000000356495a00000000102700000000000000000000"
+    },
+    {
+      "name": "set_paid_subscription",
+      "sample": {
+        "account": "alice",
+        "url": "https://viz.cx/sub",
+        "levels": 3,
+        "amount": "1.000 VIZ",
+        "period": 30
+      },
+      "hex": "3205616c6963651268747470733a2f2f76697a2e63782f7375620300e8030000000000000356495a000000001e00"
+    },
+    {
+      "name": "paid_subscribe",
+      "sample": {
+        "subscriber": "alice",
+        "account": "bob",
+        "level": 1,
+        "amount": "1.000 VIZ",
+        "period": 30,
+        "auto_renewal": true
+      },
+      "hex": "3305616c69636503626f620100e8030000000000000356495a000000001e0001"
+    },
+    {
+      "name": "set_account_price",
+      "sample": {
+        "account": "alice",
+        "account_seller": "alice",
+        "account_offer_price": "100.000 VIZ",
+        "account_on_sale": true
+      },
+      "hex": "3605616c69636505616c696365a0860100000000000356495a0000000001"
+    },
+    {
+      "name": "set_subaccount_price",
+      "sample": {
+        "account": "alice",
+        "subaccount_seller": "alice",
+        "subaccount_offer_price": "10.000 VIZ",
+        "subaccount_on_sale": false
+      },
+      "hex": "3705616c69636505616c69636510270000000000000356495a0000000000"
+    },
+    {
+      "name": "buy_account",
+      "sample": {
+        "buyer": "bob",
+        "account": "alice",
+        "account_offer_price": "100.000 VIZ",
+        "account_authorities_key": "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R",
+        "tokens_to_shares": "0.000 VIZ"
+      },
+      "hex": "3803626f6205616c696365a0860100000000000356495a0000000003a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc00000000000000000356495a00000000"
+    },
+    {
+      "name": "use_invite_balance",
+      "sample": {
+        "initiator": "alice",
+        "receiver": "bob",
+        "invite_secret": "secret123"
+      },
+      "hex": "3a05616c69636503626f6209736563726574313233"
+    },
+    {
+      "name": "target_account_sale",
+      "sample": {
+        "account": "alice",
+        "account_seller": "alice",
+        "target_buyer": "bob",
+        "account_offer_price": "100.000 VIZ",
+        "account_on_sale": true
+      },
+      "hex": "3d05616c69636505616c69636503626f62a0860100000000000356495a0000000001"
     },
     {
       "name": "set_reward_sharing",
       "sample": {
         "owner": "alice",
-        "sharing_rate": 1000
+        "sharing_rate": 5000
       },
-      "hex": "4005616c696365e803"
+      "hex": "4005616c6963658813"
+    },
+    {
+      "name": "account_witness_vote",
+      "sample": {
+        "account": "alice",
+        "validator": "bob",
+        "approve": true
+      },
+      "hex": "0705616c69636503626f6201"
+    },
+    {
+      "name": "account_witness_proxy",
+      "sample": {
+        "account": "alice",
+        "proxy": "bob"
+      },
+      "hex": "0805616c69636503626f62"
+    },
+    {
+      "name": "witness_update",
+      "sample": {
+        "owner": "alice",
+        "url": "https://viz.cx",
+        "block_signing_key": "VIZ854Zwsap3RRynKwKYgnsPnoGtL2weiXRjp57Z5ojKCpRJszL2R"
+      },
+      "hex": "0605616c6963650e68747470733a2f2f76697a2e637803a31847754ed837e6f177b587382a1993a91276a08ac26aa0e7673b19ab57b2fc"
     }
   ],
   "tx": {
