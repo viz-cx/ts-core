@@ -1,11 +1,11 @@
-import { sha256 } from '@noble/hashes/sha256';
-import { ripemd160 } from '@noble/hashes/ripemd160';
+import { sha256 } from '@noble/hashes/sha2';
+import { ripemd160 } from '@noble/hashes/legacy';
 import { VizValidationError } from '../errors';
 
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const BASE = 58n;
 const INDEX: Record<string, number> = {};
-for (let i = 0; i < ALPHABET.length; i++) INDEX[ALPHABET[i]] = i;
+Array.from(ALPHABET).forEach((ch, i) => { INDEX[ch] = i; });
 
 export function base58Encode(bytes: Uint8Array): string {
   let zeros = 0;
