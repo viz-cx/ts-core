@@ -2,9 +2,11 @@
 const path = require('node:path');
 
 const ALLOWED = new Set([
-  path.normalize('src/transport.ts'),
-  path.normalize('src/auth.ts'),
-  path.normalize('src/tx.ts'),
+  path.normalize('test/oracle/serializer.oracle.test.ts'),
+  path.normalize('test/oracle/crypto.oracle.test.ts'),
+  path.normalize('test/oracle/sign.oracle.test.ts'),
+  path.normalize('test/oracle/viz-js-lib.d.ts'),
+  path.normalize('scripts/gen-golden.mjs'),
 ]);
 
 module.exports = {
@@ -13,7 +15,7 @@ module.exports = {
     docs: { description: "Restrict viz-js-lib imports to adapter seam files" },
     schema: [],
     messages: {
-      forbidden: "Importing 'viz-js-lib' is allowed only in transport.ts/auth.ts/tx.ts",
+      forbidden: "Importing 'viz-js-lib' is allowed only in test/oracle/** and scripts/gen-golden.mjs",
     },
   },
   create(context) {

@@ -1,4 +1,4 @@
-import { ByteWriter } from './primitives';
+import type { ByteWriter } from './primitives';
 import { Asset } from '../asset';
 import type { AssetSymbol } from '../types';
 import { VizValidationError } from '../errors';

@@ -1,4 +1,4 @@
-import { ByteWriter } from './primitives';
+import type { ByteWriter } from './primitives';
 import { writeAsset } from './asset';
 import { writeAuthority } from './authority';
 import { OP_TYPE_IDS } from '../constants';

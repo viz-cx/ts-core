@@ -1,4 +1,4 @@
-import { ByteWriter } from './primitives';
+import type { ByteWriter } from './primitives';
 
 type AuthLike = Record<string, unknown>;
 

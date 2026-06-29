@@ -4,7 +4,7 @@ This file orients Claude Code, Codex, Cursor, and any other AI coding agent work
 
 ## Project in one paragraph
 
-`@viz-cx/core` is a type-safe TypeScript facade over the untyped `viz-js-lib` for the VIZ blockchain. It exposes named-argument curated methods for every broadcast operation, a typed `OperationMap` covering the long tail, and a `tx().build() → sign() → broadcast()` builder for offline signing and hardware wallet flows. Dual ESM+CJS publish, `viz-js-lib` is a peer dependency, no runtime deps of our own.
+`@viz-cx/core` is a type-safe TypeScript client for the VIZ blockchain with a minimal audited-dependency implementation (in-house crypto + serializer using `@noble/secp256k1` and `@noble/hashes`; `viz-js-lib` is retained only as a dev test oracle). It exposes named-argument curated methods for every broadcast operation, a typed `OperationMap` covering the long tail, and a `tx().build() → sign() → broadcast()` builder for offline signing and hardware wallet flows. Dual ESM+CJS publish, no runtime peer dependencies.
 
 ## Commands
 
@@ -18,13 +18,15 @@ This file orients Claude Code, Codex, Cursor, and any other AI coding agent work
 | Typecheck | `pnpm lint:types` |
 | Exports sanity (arethetypeswrong) | `pnpm lint:exports` |
 | Tarball size budget | `pnpm size` |
+| Oracle tests (viz-js-lib vs in-house) | `pnpm test` (included in vitest run) |
+| Regenerate frozen golden vectors | `pnpm gen:golden` |
 | Smoke test against live node | `pnpm smoke` |
 | Pre-publish gate | `pnpm prepublishOnly` |
 
 Use **pnpm**, not npm — lockfile is `pnpm-lock.yaml`. Repo config lives in `pnpm-workspace.yaml`:
 
-- `allowBuilds` gates which dependency build scripts run (pnpm ≥10 blocks them by default): `esbuild: true` (needed by tsup), `core-js: false`.
-- `minimumReleaseAgeExclude` whitelists a package@version past the global `minimumReleaseAge` cooldown — currently `viz-js-lib@0.12.7`, so a freshly published peer-dep version installs without waiting out the supply-chain delay. Add the next pinned `viz-js-lib@x.y.z` here when bumping the peer dep.
+- `allowBuilds` gates which dependency build scripts run (pnpm ≥10 blocks them by default): `esbuild: true` (needed by tsup).
+- `minimumReleaseAgeExclude` whitelists a package@version past the global `minimumReleaseAge` cooldown — currently `@noble/secp256k1` and `@noble/hashes`, so freshly published versions install without waiting out the supply-chain delay. Add the next pinned version here when bumping these deps.
 
 ## Source layout
 
@@ -40,7 +42,6 @@ src/
   config.ts         client config defaults
   errors.ts         VizRpcError, VizValidationError, VizTransportError
   types.ts          branded types (AccountName, PublicKey, Wif), ChainProperties
-  viz-js-lib.d.ts   ambient module declaration for the untyped peer dep
   ops/
     registry.ts     single source of truth for OperationMap — 43 op-names (40 ops + 3 deprecated witness_* aliases)
     curated.ts      named-arg curated methods, implicit-field injection map
@@ -49,7 +50,11 @@ src/
 test/
   unit/             vitest unit tests — one file per src module
   types/            tsd type-level assertions
+  oracle/           viz-js-lib oracle tests (compare in-house impl vs viz-js-lib byte-for-byte)
+                      viz-js-lib.d.ts  — ambient shim for the untyped oracle dep (dev-only)
+                      serializer.oracle.test.ts, crypto.oracle.test.ts, sign.oracle.test.ts
   integration/      live-node integration tests (gated, off by default)
+  golden/           frozen binary vectors verified by pnpm test (regression guard)
 ```
 
 ## Key invariants
@@ -59,17 +64,18 @@ test/
 - **`viz-js-lib` ships two operation registries.** `lib/broadcast/operations.js` is broader than the binary serializer's `st_operations` in `lib/auth/serializer/src/operations.js`. Only ops with a binary serializer are broadcastable today. `claim_reward_balance` is in the former but not the latter — do not add it to our registry until upstream wires the serializer.
 - **Witness → validator rename (viz-js-lib 0.12.6).** New ops: `validator_update`, `account_validator_vote`, `account_validator_proxy`, `set_reward_sharing`. Old `witness_*` op-names remain as deprecated aliases that route through the new serializers. The serializer aliases the op *name* but rejects the old `witness` field — `account_witness_vote` payloads must now use `validator`. Read API namespace moved from `witness_api` to `validator_api`.
 - **Asset fields accept three shapes**: canonical string (`'1.000 VIZ'`), an `Asset` instance, or `{ value, symbol }`. `energy`/`maxEnergy` are chain units (100 = 1%).
-- **No runtime dependencies.** `viz-js-lib` is `peerDependencies`. Don't add `dependencies` without strong justification — the 100 KB tarball budget is enforced by `pnpm size`.
+- **Minimal runtime dependencies.** Only `@noble/secp256k1` and `@noble/hashes` are in `dependencies`. `viz-js-lib` is a `devDependency` (test oracle only — never imported from `src/`). Don't add further `dependencies` without strong justification — the 100 KB tarball budget is enforced by `pnpm size`.
 
 ## Adding a new operation
 
-1. Add the param shape to `OperationMap` in `src/ops/registry.ts` (use camelCase field names).
+1. Add the param shape to `OperationMap` in `src/ops/registry.ts` (use camelCase field names). Add an `OP_SCHEMA` entry + `OP_TYPE_IDS` entry (the binary op-type id) — these are verified by the oracle serializer test.
 2. Add it to the `OP_NAMES` array.
 3. If a curated method makes sense, add it in `src/ops/curated.ts` and register implicit-field injection (e.g. `from: boundAccount`) in `CURATED_IMPLICIT_FIELD`.
 4. Add a corresponding builder method on `TxBuilder` in `src/tx.ts`. If any field is an asset with a fixed symbol (e.g. always SHARES), register it in `ASSET_SYMBOL_FIELDS`.
 5. Test: assert `transaction.operations[0]` snake_case shape in `test/unit/curated.test.ts` or `tx.test.ts`. Use the chain mock from those tests.
 6. Type test: add a `tsd` assertion in `test/types/operations.test-d.ts`.
-7. Update README's "Curated methods" and "Operation registry" sections.
+7. Run `pnpm gen:golden` to regenerate frozen vectors after any serializer change.
+8. Update README's "Curated methods" and "Operation registry" sections.
 
 ## Release process
 

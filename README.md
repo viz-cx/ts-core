@@ -1,20 +1,20 @@
 # @viz-cx/core
 
-Type-safe TypeScript wrapper for the [VIZ blockchain](https://viz.cx) built on top of [`viz-js-lib`](https://github.com/VIZ-Blockchain/viz-js-lib).
+Type-safe TypeScript client for the [VIZ blockchain](https://viz.cx) — self-contained, no peer dependencies required.
 
-`viz-js-lib` ships with no TypeScript types and a positional-argument API. This package closes that gap:
+Cryptography and transaction serialization are implemented in-house using `@noble/secp256k1` and `@noble/hashes` (audited, minimal libraries). `viz-js-lib` is **not** required at runtime; it is used only as a dev-time test oracle to verify correctness.
 
 - Named-argument curated methods for every VIZ broadcast operation
 - An `OperationMap` that types every operation — long-tail ops are also reachable via the transaction builder
 - A `tx().build() → sign() → broadcast()` pipeline for offline signing and hardware wallet integration
-- Dual ESM + CJS publish, under 100 KB, `viz-js-lib` as a peer dependency
+- Dual ESM + CJS publish, under 100 KB, no runtime peer dependencies
 
 ## Install
 
 ```bash
-npm add @viz-cx/core viz-js-lib
+npm add @viz-cx/core
 # or
-pnpm add @viz-cx/core viz-js-lib
+pnpm add @viz-cx/core
 ```
 
 ## Quickstart
