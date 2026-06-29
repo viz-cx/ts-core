@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import golden from '../fixtures/golden.json';
-import { sha256 } from '@noble/hashes/sha256';
+import { sha256 } from '@noble/hashes/sha2';
 import { ByteWriter } from '../../src/serializer/primitives';
 import { writeOperation } from '../../src/serializer/operation';
 import { serializeTransaction } from '../../src/serializer/transaction';
