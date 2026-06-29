@@ -12,7 +12,7 @@ const ALLOWED = new Set([
 module.exports = {
   meta: {
     type: 'problem',
-    docs: { description: "Restrict viz-js-lib imports to adapter seam files" },
+    docs: { description: "Restrict viz-js-lib imports to test/oracle/** and scripts/gen-golden.mjs" },
     schema: [],
     messages: {
       forbidden: "Importing 'viz-js-lib' is allowed only in test/oracle/** and scripts/gen-golden.mjs",
