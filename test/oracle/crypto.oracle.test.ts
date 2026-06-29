@@ -4,6 +4,7 @@ import vizJs from 'viz-js-lib';
 import { deriveWif, wifToPublic, isWif, isPubkey } from '../../src/crypto/keys';
 import { signDigest, recoverPubkey } from '../../src/crypto/ecdsa';
 import { sha256 } from '@noble/hashes/sha2';
+import { keys } from '../../src/auth';
 
 const auth = (vizJs as any).auth;
 const ACCOUNT = 'alice';
@@ -46,5 +47,30 @@ describe('crypto oracle: signatures', () => {
       .recoverPublicKey(Buffer.from(digest))
       .toString();
     expect(recovered).toBe(pub);
+  });
+});
+
+describe('crypto oracle: auth.sign / auth.verify', () => {
+  it('sign(buf) produces a signature recoverable by viz-js-lib', () => {
+    const wif = deriveWif(ACCOUNT, 'active', PASSWORD);
+    const pub = wifToPublic(wif);
+    const buf = Buffer.from('hello viz', 'utf8');
+    const sigHex = keys.sign(buf, wif);
+    // Our sign() does sha256(buf) then signs the digest.
+    // viz-js-lib's recoverPublicKey expects a pre-hashed 32-byte buffer.
+    const digest = Buffer.from(sha256(buf));
+    const ourSig = auth.signature.fromHex(sigHex);
+    expect(ourSig.recoverPublicKey(digest).toString()).toBe(pub);
+    // viz-js-lib's signBuffer double-hashes (sha256(sha256(buf)));
+    // verify our own signature round-trips correctly via recoverPublicKey.
+    expect(keys.verify(buf, sigHex, pub)).toBe(true);
+  });
+
+  it('verify(buf, sig, pub) agrees with viz-js-lib recovery', () => {
+    const wif = deriveWif(ACCOUNT, 'active', PASSWORD);
+    const pub = wifToPublic(wif);
+    const buf = Buffer.from('hello viz', 'utf8');
+    const sigHex = keys.sign(buf, wif);
+    expect(keys.verify(buf, sigHex, pub)).toBe(true);
   });
 });

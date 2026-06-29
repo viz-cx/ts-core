@@ -2,6 +2,7 @@ import * as secp from '@noble/secp256k1';
 import { hmac } from '@noble/hashes/hmac';
 import { sha256 } from '@noble/hashes/sha2';
 import { ripemd160 } from '@noble/hashes/legacy';
+import { hexToBytes, bytesToHex } from '@noble/hashes/utils';
 import { ADDRESS_PREFIX } from '../constants';
 import { wifToPrivBytes } from './keys';
 import { base58Encode } from './base58';
@@ -38,7 +39,7 @@ export function signDigest(digest32: Uint8Array, wif: string): string {
       out[0] = recid + 31;
       out.set(r, 1);
       out.set(s, 33);
-      return Buffer.from(out).toString('hex');
+      return bytesToHex(out);
     }
     attempt++;
     if (attempt > 1000) {
@@ -52,7 +53,7 @@ export function signDigest(digest32: Uint8Array, wif: string): string {
 }
 
 export function recoverPubkey(digest32: Uint8Array, sigHex: string): string {
-  const bytes = Uint8Array.from(Buffer.from(sigHex, 'hex'));
+  const bytes = hexToBytes(sigHex);
   if (bytes.length !== 65) {
     throw new VizValidationError({
       field: 'signature',
@@ -61,6 +62,9 @@ export function recoverPubkey(digest32: Uint8Array, sigHex: string): string {
     });
   }
   const recid = (bytes[0] as number) - 31;
+  if (recid < 0 || recid > 3) {
+    throw new VizValidationError({ field: 'signature', expected: 'recid byte 31-34', received: String(bytes[0]) });
+  }
   const compact = bytes.slice(1);
   const sig = secp.Signature.fromCompact(compact).addRecoveryBit(recid);
   const point = sig.recoverPublicKey(digest32);
