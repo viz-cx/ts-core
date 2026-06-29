@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ByteWriter } from '../../src/serializer/primitives';
+import { deriveWif, wifToPublic, pubkeyToBytes } from '../../src/crypto/keys';
 
 describe('primitives', () => {
   it('uint16/uint32 little-endian', () => {
@@ -31,5 +32,13 @@ describe('primitives', () => {
   });
   it('vector', () => {
     expect(new ByteWriter().vector([1, 2], (w, v) => w.uint8(v)).hex()).toBe('020102');
+  });
+  it('pubkey writes 33 raw bytes', () => {
+    const wif = deriveWif('alice', 'active', 'correct horse battery staple correct horse');
+    const pub = wifToPublic(wif);
+    const w = new ByteWriter().pubkey(pub);
+    const raw = pubkeyToBytes(pub);
+    expect(w.hex()).toBe(Array.from(raw, b => b.toString(16).padStart(2, '0')).join(''));
+    expect(w.bytes().length).toBe(33);
   });
 });

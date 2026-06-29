@@ -94,7 +94,11 @@ export function pubkeyToBytes(pub: string): Uint8Array {
   if (!pub.startsWith(ADDRESS_PREFIX)) {
     throw new VizValidationError({ field: 'pubkey', expected: `${ADDRESS_PREFIX} prefix`, received: pub });
   }
-  return base58DecodeRipemdVerified(pub.slice(ADDRESS_PREFIX.length));
+  const result = base58DecodeRipemdVerified(pub.slice(ADDRESS_PREFIX.length));
+  if (result.length !== 33) {
+    throw new VizValidationError({ field: 'pubkey', expected: '33-byte compressed point', received: result.length });
+  }
+  return result;
 }
 
 export function generateActive(seedHex: string): { wif: string; pub: string } {

@@ -37,7 +37,8 @@ export class ByteWriter {
     return this.raw(bytes);
   }
   time(iso: string): this {
-    const ms = Date.parse(iso.endsWith('Z') ? iso : iso + 'Z');
+    const normalized = /Z$|[+-]\d{2}:\d{2}$/.test(iso) ? iso : iso + 'Z';
+    const ms = Date.parse(normalized);
     if (Number.isNaN(ms)) throw new VizValidationError({ field: 'time', expected: 'ISO date', received: iso });
     return this.uint32(Math.floor(ms / 1000));
   }
@@ -55,5 +56,5 @@ export class ByteWriter {
   }
 
   bytes(): Uint8Array { return Uint8Array.from(this.buf); }
-  hex(): string { return Buffer.from(this.buf).toString('hex'); }
+  hex(): string { return Array.from(this.buf, b => b.toString(16).padStart(2, '0')).join(''); }
 }
