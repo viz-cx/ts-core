@@ -56,6 +56,7 @@
     "size": "node scripts/check-tarball-size.mjs",
     "smoke": "node scripts/smoke-test.mjs",
     "prepublishOnly": "pnpm clean && pnpm build && pnpm lint:types && pnpm test && pnpm test:types && pnpm lint:exports && pnpm size",
+    "gen:golden": "tsx scripts/gen-golden.mjs",
     "release": "changeset publish"
   },
   "dependencies": {

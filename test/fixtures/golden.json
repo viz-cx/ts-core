@@ -1,0 +1,80 @@
+{
+  "ops": [
+    {
+      "name": "transfer",
+      "sample": {
+        "from": "alice",
+        "to": "bob",
+        "amount": "1.000 VIZ",
+        "memo": ""
+      },
+      "hex": "0205616c69636503626f62e8030000000000000356495a0000000000"
+    },
+    {
+      "name": "award",
+      "sample": {
+        "initiator": "alice",
+        "receiver": "bob",
+        "energy": 50,
+        "custom_sequence": 0,
+        "memo": "",
+        "beneficiaries": []
+      },
+      "hex": "2f05616c69636503626f62320000000000000000000000"
+    },
+    {
+      "name": "custom",
+      "sample": {
+        "required_active_auths": [],
+        "required_regular_auths": [
+          "alice"
+        ],
+        "id": "x",
+        "json": "{}"
+      },
+      "hex": "0a000105616c6963650178027b7d"
+    },
+    {
+      "name": "account_metadata",
+      "sample": {
+        "account": "alice",
+        "json_metadata": "{}"
+      },
+      "hex": "1505616c696365027b7d"
+    },
+    {
+      "name": "set_reward_sharing",
+      "sample": {
+        "owner": "alice",
+        "sharing_rate": 1000
+      },
+      "hex": "4005616c696365e803"
+    }
+  ],
+  "tx": {
+    "wire": {
+      "ref_block_num": 100,
+      "ref_block_prefix": 200,
+      "expiration": "2026-06-30T00:00:00",
+      "operations": [
+        [
+          "transfer",
+          {
+            "from": "alice",
+            "to": "bob",
+            "amount": "1.000 VIZ",
+            "memo": ""
+          }
+        ]
+      ],
+      "extensions": []
+    },
+    "hex": "6400c80000000007436a010205616c69636503626f62e8030000000000000356495a000000000000"
+  },
+  "sig": {
+    "wif": "5Jtx6S3g9EDVLpc7gG6bYUr2mgcGRm5M9vhfM4oDMBCLx8EvbqA",
+    "digestHex": "b76fc513b034c4d167917d988e90a8817b2bb34fb46680ad3f442934953c2b99",
+    "sigHex": "1f6d94c2c6270bd35431f6c0067f651c1dd79cff6b16f84bf07b61ca624468e66a2e9d372a54359de5596ee2a624ac3ee39eda997fbb581390b65307350d7ad6fd",
+    "pub": "VIZ5kCizfKELPApieLHMxpZVt5SpQ85s2L2MaUcv2Pk96ZKY8RzcY"
+  }
+}
