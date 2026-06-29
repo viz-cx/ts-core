@@ -58,7 +58,7 @@ export function base58CheckEncodeSha(payload: Uint8Array): string {
 
 export function base58CheckDecodeSha(s: string): Uint8Array {
   const buf = base58Decode(s);
-  if (buf.length < 4) throw new VizValidationError({ field: 'base58check', expected: '>=4 bytes', received: buf.length });
+  if (buf.length <= 4) throw new VizValidationError({ field: 'base58check', expected: '>4 bytes', received: buf.length });
   const payload = buf.slice(0, -4);
   const checksum = buf.slice(-4);
   const expected = sha256(sha256(payload)).slice(0, 4);
@@ -73,7 +73,7 @@ export function base58CheckEncodeRipemd(payload: Uint8Array): string {
 
 export function base58CheckDecodeRipemd(s: string): Uint8Array {
   const buf = base58Decode(s);
-  if (buf.length < 4) throw new VizValidationError({ field: 'base58check', expected: '>=4 bytes', received: buf.length });
+  if (buf.length <= 4) throw new VizValidationError({ field: 'base58check', expected: '>4 bytes', received: buf.length });
   const payload = buf.slice(0, -4);
   const checksum = buf.slice(-4);
   const expected = ripemd160(payload).slice(0, 4);
