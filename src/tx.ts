@@ -1,4 +1,5 @@
 import { sha256 } from '@noble/hashes/sha2';
+import { hexToBytes } from '@noble/hashes/utils';
 import { Asset } from './asset';
 import { CHAIN_ID } from './constants';
 import { VizValidationError } from './errors';
@@ -170,12 +171,6 @@ function refBlockPrefixFromHeadId(headBlockId: string): number {
 function plusSeconds(iso: string, sec: number): string {
   const d = new Date(iso + (iso.endsWith('Z') ? '' : 'Z'));
   return new Date(d.getTime() + sec * 1000).toISOString().replace(/\.\d{3}Z$/, '');
-}
-
-function hexToBytes(hex: string): Uint8Array {
-  const out = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-  return out;
 }
 
 function signWire(wire: {

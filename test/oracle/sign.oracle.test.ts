@@ -3,10 +3,13 @@ import { describe, it, expect } from 'vitest';
 import vizJs from 'viz-js-lib';
 import { createRequire } from 'module';
 import { sha256 } from '@noble/hashes/sha2';
+import { hexToBytes } from '@noble/hashes/utils';
 import { CHAIN_ID } from '../../src/constants';
 import { serializeTransaction } from '../../src/serializer/transaction';
 import { signDigest, recoverPubkey } from '../../src/crypto/ecdsa';
 import { deriveWif, wifToPublic } from '../../src/crypto/keys';
+import { sign as signTx } from '../../src/tx';
+import type { UnsignedTransaction } from '../../src/types';
 
 const require = createRequire(import.meta.url);
 const auth = (vizJs as any).auth;
@@ -40,5 +43,32 @@ describe('sign oracle', () => {
       .recoverPublicKey(Buffer.from(digest))
       .toString();
     expect(vizRecovered).toBe(wifToPublic(wif));
+  });
+
+  it('standalone sign() produces a recoverable signature end-to-end', async () => {
+    const wif = deriveWif('alice', 'active', 'pw pw pw pw pw pw');
+    const unsigned: UnsignedTransaction = {
+      refBlockNum: 100,
+      refBlockPrefix: 200,
+      expiration: '2026-06-30T00:00:00',
+      operations: [['transfer', { from: 'alice', to: 'bob', amount: '1.000 VIZ', memo: '' }]] as any,
+      extensions: [],
+    };
+    const signed = await signTx(unsigned, { activeKey: wif });
+    expect(signed.signatures).toHaveLength(1);
+    const wire = {
+      ref_block_num: unsigned.refBlockNum,
+      ref_block_prefix: unsigned.refBlockPrefix,
+      expiration: unsigned.expiration,
+      operations: unsigned.operations,
+      extensions: unsigned.extensions,
+    };
+    const txBytes = serializeTransaction(wire as any);
+    const cid = hexToBytes(CHAIN_ID);
+    const all = new Uint8Array(cid.length + txBytes.length);
+    all.set(cid, 0);
+    all.set(txBytes, cid.length);
+    const digest = sha256(all);
+    expect(recoverPubkey(digest, signed.signatures[0]!)).toBe(wifToPublic(wif));
   });
 });
