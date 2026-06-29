@@ -50,13 +50,7 @@ import { writeOperation } from '../../src/serializer/operation';
 import { OP_NAMES } from '../../src/ops/registry';
 import { OP_SCHEMA } from '../../src/serializer/op-schema';
 import { OP_TYPE_IDS } from '../../src/constants';
-import { deriveWif, wifToPublic } from '../../src/crypto/keys';
 import { SAMPLES } from './samples.mjs';
-
-// Generate a deterministic valid VIZ public key for tests
-const TEST_PUBKEY = wifToPublic(deriveWif('testaccount', 'master', 'testpassword123'));
-
-const EMPTY_AUTH = { weight_threshold: 1, account_auths: [], key_auths: [[TEST_PUBKEY, 1]] };
 
 describe('serializer oracle: every op', () => {
   for (const [name, sample] of Object.entries(SAMPLES)) {
