@@ -10,6 +10,7 @@ export class ByteWriter {
   raw(bytes: Uint8Array): this { for (const b of bytes) this.buf.push(b); return this; }
 
   uint8(n: number): this { this.buf.push(n & 0xff); return this; }
+  int16(n: number): this { this.buf.push(n & 0xff, (n >> 8) & 0xff); return this; }
   uint16(n: number): this { this.buf.push(n & 0xff, (n >>> 8) & 0xff); return this; }
   uint32(n: number): this {
     this.buf.push(n & 0xff, (n >>> 8) & 0xff, (n >>> 16) & 0xff, (n >>> 24) & 0xff);
