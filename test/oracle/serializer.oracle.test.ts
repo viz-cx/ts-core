@@ -258,3 +258,22 @@ it('serializes custom op with multiple required_active_auths sorted', () => {
   const expected = Buffer.from((b.copy(0, b.offset) as { toBuffer: () => Buffer }).toBuffer()).toString('hex');
   expect(w.hex()).toBe(expected);
 });
+
+// ─── Transaction envelope oracle ────────────────────────────────────────────
+
+import { serializeTransaction } from '../../src/serializer/transaction';
+
+describe('serializer oracle: transaction', () => {
+  it('serializes a full tx identically to viz transaction.toBuffer', () => {
+    const tx = {
+      ref_block_num: 1234,
+      ref_block_prefix: 567890,
+      expiration: '2026-06-30T00:00:00',
+      operations: [['transfer', { from: 'alice', to: 'bob', amount: '1.000 VIZ', memo: 'hi' }]] as any,
+      extensions: [],
+    };
+    const ours = Buffer.from(serializeTransaction(tx)).toString('hex');
+    const theirs = Buffer.from(ops.transaction.toBuffer(tx)).toString('hex');
+    expect(ours).toBe(theirs);
+  });
+});
