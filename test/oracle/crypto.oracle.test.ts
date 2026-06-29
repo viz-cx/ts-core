@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 // eslint-disable-next-line no-direct-viz-js-lib -- test oracle
 import vizJs from 'viz-js-lib';
 import { deriveWif, wifToPublic, isWif, isPubkey } from '../../src/crypto/keys';
+import { signDigest, recoverPubkey } from '../../src/crypto/ecdsa';
+import { sha256 } from '@noble/hashes/sha256';
 
 const auth = (vizJs as any).auth;
 const ACCOUNT = 'alice';
@@ -24,5 +26,25 @@ describe('crypto oracle: keys', () => {
     const pub = wifToPublic(wif);
     expect(isWif(wif)).toBe(auth.isWif(wif));
     expect(isPubkey(pub)).toBe(true);
+  });
+});
+
+describe('crypto oracle: signatures', () => {
+  it('produces a canonical signature that recovers to the signer pubkey', () => {
+    const wif = deriveWif('alice', 'active', 'correct horse battery staple correct horse');
+    const pub = wifToPublic(wif);
+    const digest = sha256(new Uint8Array([1, 2, 3, 4]));
+    const sig = signDigest(digest, wif);
+    expect(sig).toHaveLength(130); // 65 bytes hex
+    expect(recoverPubkey(digest, sig)).toBe(pub);
+    // viz-js-lib accepts and recovers our signature to the same pubkey.
+    // recoverPublicKey(sha256_buf) expects a pre-hashed 32-byte buffer;
+    // digest is already sha256([1,2,3,4]), so pass it directly (not recoverPublicKeyFromBuffer
+    // which would double-hash it).
+    const recovered = auth.signature
+      .fromBuffer(Buffer.from(sig, 'hex'))
+      .recoverPublicKey(Buffer.from(digest))
+      .toString();
+    expect(recovered).toBe(pub);
   });
 });
