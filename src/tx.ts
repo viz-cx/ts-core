@@ -1,7 +1,9 @@
-// eslint-disable-next-line no-direct-viz-js-lib -- intentional adapter seam
-import vizJs from 'viz-js-lib';
+import { sha256 } from '@noble/hashes/sha2';
 import { Asset } from './asset';
+import { CHAIN_ID } from './constants';
 import { VizValidationError } from './errors';
+import { serializeTransaction } from './serializer/transaction';
+import { signDigest } from './crypto/ecdsa';
 import type { Transport } from './transport';
 import type {
   AssetInput,
@@ -170,10 +172,27 @@ function plusSeconds(iso: string, sec: number): string {
   return new Date(d.getTime() + sec * 1000).toISOString().replace(/\.\d{3}Z$/, '');
 }
 
-interface VizAuthTx {
-  signTransaction(tx: object, keys: string[]): { signatures: string[] };
+function hexToBytes(hex: string): Uint8Array {
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  return out;
 }
-const txAuth: VizAuthTx = (vizJs as unknown as { auth: VizAuthTx }).auth;
+
+function signWire(wire: {
+  ref_block_num: number;
+  ref_block_prefix: number;
+  expiration: string;
+  operations: ReadonlyArray<readonly [string, Record<string, unknown>]>;
+  extensions: ReadonlyArray<unknown>;
+}, key: string): string[] {
+  const txBytes = serializeTransaction(wire);
+  const cid = hexToBytes(CHAIN_ID);
+  const all = new Uint8Array(cid.length + txBytes.length);
+  all.set(cid, 0);
+  all.set(txBytes, cid.length);
+  const digest = sha256(all);
+  return [signDigest(digest, key)];
+}
 
 export function createTxBuilder(opts: TxBuilderOptions): TxBuilder {
   const ops: WireOp[] = [];
@@ -257,7 +276,7 @@ export function createTxBuilder(opts: TxBuilderOptions): TxBuilder {
               operations: tx.operations,
               extensions: tx.extensions,
             };
-            const { signatures } = txAuth.signTransaction(wire, [key]);
+            const signatures = signWire(wire, key);
             return { ...tx, signatures };
           })();
         }
@@ -286,6 +305,6 @@ export async function sign(
     operations: tx.operations,
     extensions: tx.extensions,
   };
-  const { signatures } = txAuth.signTransaction(wire, [options.activeKey]);
+  const signatures = signWire(wire, options.activeKey);
   return { ...tx, signatures };
 }
