@@ -64,16 +64,16 @@
     "@noble/secp256k1": "^2.3.0"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.15.4",
+    "@arethetypeswrong/cli": "^0.18.4",
     "@changesets/cli": "^2.27.7",
-    "@types/node": "^20.14.0",
-    "@typescript-eslint/eslint-plugin": "^7.13.0",
-    "@typescript-eslint/parser": "^7.13.0",
+    "@types/node": "^26.0.1",
+    "@typescript-eslint/eslint-plugin": "^8.62.0",
+    "@typescript-eslint/parser": "^8.62.0",
     "@vitest/coverage-v8": "^3.2.6",
     "eslint": "^8.57.0",
-    "tsd": "^0.31.1",
+    "tsd": "^0.33.0",
     "tsup": "^8.1.0",
-    "typescript": "^5.4.5",
+    "typescript": "^5.9.3",
     "vitest": "^3.2.6",
     "viz-js-lib": "^0.12.7"
   },
