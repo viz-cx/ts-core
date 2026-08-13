@@ -5,7 +5,11 @@ export interface DynamicGlobalProperties {
   head_block_number: number;
   head_block_id: string;
   time: string;
-  current_witness: string;
+  current_validator: string;
+  /** @deprecated Renamed to {@link DynamicGlobalProperties.current_validator}
+   * in the viz-cpp-node witness→validator migration. The node now emits
+   * `current_validator`; this alias is kept only for older nodes. */
+  current_witness?: string;
   total_pow?: number;
   total_vesting_fund?: string;
   total_vesting_shares?: string;
@@ -29,10 +33,15 @@ export interface Account {
 export interface Block {
   previous: string;
   timestamp: string;
-  witness: string;
+  validator: string;
+  /** @deprecated Renamed to {@link Block.validator} in the witness→validator
+   * migration. The node now emits `validator`; kept only for older nodes. */
+  witness?: string;
   transaction_merkle_root: string;
   extensions: unknown[];
-  witness_signature: string;
+  validator_signature: string;
+  /** @deprecated Renamed to {@link Block.validator_signature}. */
+  witness_signature?: string;
   transactions: unknown[];
   block_id: string;
   signing_key: string;
@@ -55,7 +64,7 @@ export interface ReadApi {
   getAccounts(names: ReadonlyArray<AccountName | string>): Promise<Account[]>;
   lookupAccountNames(names: ReadonlyArray<AccountName | string>): Promise<(Account | null)[]>;
   getBlock(blockNum: number): Promise<Block | null>;
-  getBlockHeader(blockNum: number): Promise<Pick<Block, 'previous' | 'timestamp' | 'witness'> | null>;
+  getBlockHeader(blockNum: number): Promise<Pick<Block, 'previous' | 'timestamp' | 'validator' | 'witness'> | null>;
   getAccountHistory(name: AccountName | string, from: number, limit: number): Promise<Array<readonly [number, AccountHistoryItem]>>;
   getOpsInBlock(blockNum: number, onlyVirtual: boolean): Promise<AccountHistoryItem[]>;
   getKeyReferences(keys: string[]): Promise<string[][]>;
