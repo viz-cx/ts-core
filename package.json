@@ -75,7 +75,7 @@
     "tsup": "^8.1.0",
     "typescript": "^5.9.3",
     "vitest": "^3.2.6",
-    "viz-js-lib": "^0.12.7"
+    "viz-js-lib": "^0.18.2"
   },
   "publishConfig": {
     "access": "public"
