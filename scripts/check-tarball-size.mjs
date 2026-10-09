@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { readdirSync, statSync, rmSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const BUDGET_BYTES = 100 * 1024;
+const BUDGET_BYTES = 128 * 1024; // raised from 100 KB with the HF14 prediction-market surface (23 ops + 55 chain props)
 const PACK_DIR = '.pack-tmp';
 
 rmSync(PACK_DIR, { recursive: true, force: true });

@@ -43,7 +43,7 @@ src/
   errors.ts         VizRpcError, VizValidationError, VizTransportError
   types.ts          branded types (AccountName, PublicKey, Wif), ChainProperties
   ops/
-    registry.ts     single source of truth for OperationMap — 43 op-names (40 ops + 3 deprecated witness_* aliases)
+    registry.ts     single source of truth for OperationMap — 66 op-names (63 ops incl. 23 HF14 prediction-market ops + 3 deprecated witness_* aliases)
     curated.ts      named-arg curated methods, implicit-field injection map
     raw.ts          op('name', params) escape hatch
 

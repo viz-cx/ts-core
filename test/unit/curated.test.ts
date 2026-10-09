@@ -74,6 +74,24 @@ async function send(method: keyof VizClient, args: Record<string, unknown>) {
 }
 
 describe('curated methods', () => {
+  // ─── Prediction markets ─────────────────────────────────────────────────────
+
+  describe('pmPlaceBet', () => {
+    it('injects `account`, snake-cases keys and normalizes amount', async () => {
+      const [op, p] = await send('pmPlaceBet', { marketId: 42, side: 1, outcomeIndex: -1, amount: '1.500 VIZ', minTokens: 0, mode: 0 });
+      expect(op).toBe('pm_place_bet');
+      expect(p).toMatchObject({ account: 'alice', market_id: 42, side: 1, outcome_index: -1, amount: '1.500 VIZ' });
+    });
+  });
+
+  describe('pmTransferPosition', () => {
+    it('keeps numeric amount (share weight) untouched', async () => {
+      const [op, p] = await send('pmTransferPosition', { betId: 9, to: 'bob', amount: 1000 });
+      expect(op).toBe('pm_transfer_position');
+      expect(p).toMatchObject({ from: 'alice', bet_id: 9, to: 'bob', amount: 1000, memo: '' });
+    });
+  });
+
   // ─── Vesting ────────────────────────────────────────────────────────────────
 
   describe('transferToVesting', () => {

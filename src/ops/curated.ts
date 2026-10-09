@@ -76,6 +76,31 @@ export interface CuratedClient {
   setSubaccountPrice: CuratedMethod<'set_subaccount_price', 'account'>;
   buyAccount:         CuratedMethod<'buy_account',          'buyer'>;
   targetAccountSale:  CuratedMethod<'target_account_sale',  'account'>;
+
+  // ─── Prediction markets (HF14) ──────────────────────────────
+  pmOracleRegister:       CuratedMethod<'pm_oracle_register', 'owner'>;
+  pmOracleUpdate:         CuratedMethod<'pm_oracle_update', 'owner'>;
+  pmCreateMarket:         CuratedMethod<'pm_create_market', 'creator'>;
+  pmOracleAcceptMarket:   CuratedMethod<'pm_oracle_accept_market', 'oracle'>;
+  pmPlaceBet:             CuratedMethod<'pm_place_bet', 'account'>;
+  pmCommitBet:            CuratedMethod<'pm_commit_bet', 'account'>;
+  pmRevealBet:            CuratedMethod<'pm_reveal_bet', 'account'>;
+  pmCancelBet:            CuratedMethod<'pm_cancel_bet', 'account'>;
+  pmAddLiquidity:         CuratedMethod<'pm_add_liquidity', 'provider'>;
+  pmWithdrawLiquidity:    CuratedMethod<'pm_withdraw_liquidity', 'provider'>;
+  pmResolveMarket:        CuratedMethod<'pm_resolve_market', 'oracle'>;
+  pmNoContest:            CuratedMethod<'pm_no_contest', 'oracle'>;
+  pmDisputeCreate:        CuratedMethod<'pm_dispute_create', 'disputer'>;
+  pmDisputeVote:          CuratedMethod<'pm_dispute_vote', 'voter'>;
+  pmDisputeResolve:       CuratedMethod<'pm_dispute_resolve', 'resolver'>;
+  pmTransferPosition:     CuratedMethod<'pm_transfer_position', 'from'>;
+  pmLazyDeposit:          CuratedMethod<'pm_lazy_deposit', 'account'>;
+  pmLazyWithdraw:         CuratedMethod<'pm_lazy_withdraw', 'account'>;
+  pmLeverageOpen:         CuratedMethod<'pm_leverage_open', 'account'>;
+  pmLeverageClose:        CuratedMethod<'pm_leverage_close', 'account'>;
+  pmLeverageConvert:      CuratedMethod<'pm_leverage_convert', 'account'>;
+  pmDisputeOracleRespond: CuratedMethod<'pm_dispute_oracle_respond', 'oracle'>;
+  pmUnban:                CuratedMethod<'pm_unban', 'resolver'>;
 }
 
 export const CURATED_METHOD_TO_OP: Record<keyof CuratedClient, OperationName> = {
@@ -122,6 +147,29 @@ export const CURATED_METHOD_TO_OP: Record<keyof CuratedClient, OperationName> = 
   setSubaccountPrice: 'set_subaccount_price',
   buyAccount: 'buy_account',
   targetAccountSale: 'target_account_sale',
+  pmOracleRegister: 'pm_oracle_register',
+  pmOracleUpdate: 'pm_oracle_update',
+  pmCreateMarket: 'pm_create_market',
+  pmOracleAcceptMarket: 'pm_oracle_accept_market',
+  pmPlaceBet: 'pm_place_bet',
+  pmCommitBet: 'pm_commit_bet',
+  pmRevealBet: 'pm_reveal_bet',
+  pmCancelBet: 'pm_cancel_bet',
+  pmAddLiquidity: 'pm_add_liquidity',
+  pmWithdrawLiquidity: 'pm_withdraw_liquidity',
+  pmResolveMarket: 'pm_resolve_market',
+  pmNoContest: 'pm_no_contest',
+  pmDisputeCreate: 'pm_dispute_create',
+  pmDisputeVote: 'pm_dispute_vote',
+  pmDisputeResolve: 'pm_dispute_resolve',
+  pmTransferPosition: 'pm_transfer_position',
+  pmLazyDeposit: 'pm_lazy_deposit',
+  pmLazyWithdraw: 'pm_lazy_withdraw',
+  pmLeverageOpen: 'pm_leverage_open',
+  pmLeverageClose: 'pm_leverage_close',
+  pmLeverageConvert: 'pm_leverage_convert',
+  pmDisputeOracleRespond: 'pm_dispute_oracle_respond',
+  pmUnban: 'pm_unban',
 };
 
 export const CURATED_IMPLICIT_FIELD: Partial<Record<keyof CuratedClient, string>> = {
@@ -167,4 +215,27 @@ export const CURATED_IMPLICIT_FIELD: Partial<Record<keyof CuratedClient, string>
   setSubaccountPrice: 'account',
   buyAccount: 'buyer',
   targetAccountSale: 'account',
+  pmOracleRegister: 'owner',
+  pmOracleUpdate: 'owner',
+  pmCreateMarket: 'creator',
+  pmOracleAcceptMarket: 'oracle',
+  pmPlaceBet: 'account',
+  pmCommitBet: 'account',
+  pmRevealBet: 'account',
+  pmCancelBet: 'account',
+  pmAddLiquidity: 'provider',
+  pmWithdrawLiquidity: 'provider',
+  pmResolveMarket: 'oracle',
+  pmNoContest: 'oracle',
+  pmDisputeCreate: 'disputer',
+  pmDisputeVote: 'voter',
+  pmDisputeResolve: 'resolver',
+  pmTransferPosition: 'from',
+  pmLazyDeposit: 'account',
+  pmLazyWithdraw: 'account',
+  pmLeverageOpen: 'account',
+  pmLeverageClose: 'account',
+  pmLeverageConvert: 'account',
+  pmDisputeOracleRespond: 'oracle',
+  pmUnban: 'resolver',
 };

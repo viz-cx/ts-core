@@ -43,8 +43,7 @@ describe('sign oracle', () => {
       .recoverPublicKey(Buffer.from(digest))
       .toString();
     expect(vizRecovered).toBe(wifToPublic(wif));
-  });
-
+  }, 20_000); // viz-js-lib pure-JS ECDSA recovery is slow under parallel load
   it('standalone sign() produces a recoverable signature end-to-end', async () => {
     const wif = deriveWif('alice', 'active', 'pw pw pw pw pw pw');
     const unsigned: UnsignedTransaction = {

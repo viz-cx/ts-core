@@ -50,7 +50,7 @@ import { writeOperation } from '../../src/serializer/operation';
 import { OP_NAMES } from '../../src/ops/registry';
 import { OP_SCHEMA } from '../../src/serializer/op-schema';
 import { OP_TYPE_IDS } from '../../src/constants';
-import { SAMPLES } from './samples.mjs';
+import { SAMPLES, PM_PROPS_SAMPLE } from './samples.mjs';
 
 describe('serializer oracle: every op', () => {
   for (const [name, sample] of Object.entries(SAMPLES)) {
@@ -63,6 +63,19 @@ describe('serializer oracle: every op', () => {
       const expected = Buffer.from((b.copy(0, b.offset) as { toBuffer: () => Buffer }).toBuffer()).toString('hex');
       expect(w.hex()).toBe(expected);
     });
+  }
+});
+
+it('serializes versioned_chain_properties_update variant 5 (chain_properties_pm) identically', () => {
+  const w = new ByteWriter();
+  writeOperation(w, 'versioned_chain_properties_update', PM_PROPS_SAMPLE);
+  expect(w.hex()).toBe(vizHex(ops.operation, ['versioned_chain_properties_update', PM_PROPS_SAMPLE]));
+});
+
+it('op type ids match the oracle st_operations index by name', () => {
+  for (const [name, id] of Object.entries(OP_TYPE_IDS)) {
+    const expected = name.includes('witness') ? name.replace('witness', 'validator') : name;
+    expect(ops.operation.st_operations[id].operation_name, name).toBe(expected);
   }
 });
 

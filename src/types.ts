@@ -60,6 +60,61 @@ export interface ChainProperties {
   withdrawIntervals?: number;
   // hf13
   distributionEpochLength?: number;
+  // hf14 (chain_properties_pm, variant PM_PROPS_VERSION)
+  pmOracleRegistrationFee?: string;
+  pmMinOracleInsurance?: string;
+  pmMarketCreationFee?: string;
+  pmMinLiquidity?: string;
+  pmMaxOutcomes?: number;
+  pmMaxMarketDuration?: number;
+  pmMaxOracleFeePercent?: number;
+  pmOracleAcceptWindowSec?: number;
+  pmListingMinCoveragePercent?: number;
+  pmBettingMinCoveragePercent?: number;
+  pmDefaultTimePenaltyPercent?: number;
+  pmMaxTimePenalty?: number;
+  pmDisputeFee?: string;
+  pmDisputeGraceSec?: number;
+  pmOracleDisputeResponseSec?: number;
+  pmDisputeAutoCloseSec?: number;
+  pmDisputeVotePeriodSec?: number;
+  pmDisputeApproveMinPercent?: number;
+  pmOraclePenaltyPercent?: number;
+  pmNoContestPenaltyPercent?: number;
+  pmDisputeRewardMultiplier?: number;
+  pmBatchEpochBlocks?: number;
+  pmRevealWindowBlocks?: number;
+  pmCommitNoRevealPenaltyPercent?: number;
+  pmMinBatchBet?: string;
+  pmCommitRevealEnabled?: boolean;
+  pmProcessingCapPerBlock?: number;
+  pmLazyPoolEnabled?: boolean;
+  pmLazyAllocPercent?: number;
+  pmLazyMaxTotalAllocPercent?: number;
+  pmLazyLockSec?: number;
+  pmLazyRecallStepPercent?: number;
+  pmLazyEmergencyPenaltyPercent?: number;
+  pmLazyMinLiquidityFeePercent?: number;
+  pmLeverageEnabled?: boolean;
+  pmLeverageFundPercent?: number;
+  pmLeverageMaxPerPositionBp?: number;
+  pmLeveragePoolProfitPercent?: number;
+  pmLeverageSafetyMarginPercent?: number;
+  pmLeverageMaxSlippagePercent?: number;
+  pmLeverageMinMarketLiquidity?: string;
+  pmLeverageMaxPositionRatioPercent?: number;
+  pmLeverageExpirationBufferSec?: number;
+  pmLeverageMFactorPercent?: number;
+  pmLeverageFundingRatePpmPerDay?: number;
+  pmConversionProfitCostPercent?: number;
+  pmClosedMarketRetentionSec?: number;
+  pmEarlyExitRewardCapPercent?: number;
+  pmMinBet?: string;
+  pmSettleRowsPerBlock?: number;
+  committeeVotesPerRequest?: number;
+  committeeVoteMinVesting?: string;
+  pmDisputeVotesPerMarket?: number;
+  pmDisputeVoteMinVesting?: string;
 }
 
 /**
@@ -68,6 +123,13 @@ export interface ChainProperties {
  * hf9=3, hf13=4) is fixed by the chain's protocol definition.
  */
 export const HF13_PROPS_VERSION = 4;
+
+/**
+ * static_variant index selecting chain_properties_pm (HF14) in
+ * versioned_chain_properties_update — the variant a validator must submit to
+ * vote on prediction-market parameters.
+ */
+export const PM_PROPS_VERSION = 5;
 
 export interface Operation<T extends string = string> {
   readonly 0: T;

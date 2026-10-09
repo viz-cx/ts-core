@@ -260,6 +260,20 @@ paid_subscribe  set_paid_subscription
 create_invite  claim_invite_balance  invite_registration  use_invite_balance
 request_account_recovery  recover_account  change_recovery_account
 set_account_price  set_subaccount_price  buy_account  target_account_sale
+pm_oracle_register  pm_oracle_update  pm_create_market  pm_oracle_accept_market
+pm_place_bet  pm_commit_bet  pm_reveal_bet  pm_cancel_bet
+pm_add_liquidity  pm_withdraw_liquidity  pm_resolve_market  pm_no_contest
+pm_dispute_create  pm_dispute_vote  pm_dispute_resolve  pm_transfer_position
+pm_lazy_deposit  pm_lazy_withdraw  pm_leverage_open  pm_leverage_close  pm_leverage_convert
+pm_dispute_oracle_respond  pm_unban
+```
+
+Prediction-market (HF14) ops are available as curated methods too:
+
+```ts
+await client.pmPlaceBet({ marketId: 42, side: 1, outcomeIndex: -1, amount: '1.500 VIZ', minTokens: 0, mode: 0 });
+// Validators vote on PM parameters with the chain_properties_pm variant:
+await client.versionedChainPropertiesUpdate({ props: [PM_PROPS_VERSION, { ...props, pmMinBet: '0.100 VIZ' }] });
 ```
 
 ```ts

@@ -15,6 +15,11 @@ describe('operation registry', () => {
     }>();
   });
 
+  it('exposes prediction-market ops', () => {
+    expectTypeOf<OperationParams<'pm_oracle_update'>>().toMatchTypeOf<{ owner: string; feePercent?: number }>();
+    expectTypeOf<OperationParams<'pm_transfer_position'>>().toMatchTypeOf<{ amount: number }>();
+  });
+
   it('exposes long-tail ops', () => {
     expectTypeOf<OperationName>().toMatchTypeOf<'account_update' | 'proposal_create'>();
   });
@@ -30,6 +35,7 @@ describe('operation registry', () => {
     expect(OP_NAMES).toContain('custom');
     expect(OP_NAMES).toContain('committee_vote_request');
     expect(OP_NAMES).toContain('proposal_create');
+    expect(OP_NAMES).toContain('pm_place_bet');
     expect(new Set(OP_NAMES).size).toBe(OP_NAMES.length);
   });
 });

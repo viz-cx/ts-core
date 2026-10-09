@@ -1,4 +1,5 @@
 import type { ByteWriter } from './primitives';
+import { hexToBytes } from '@noble/hashes/utils';
 import { writeAsset } from './asset';
 import { writeAuthority } from './authority';
 import { OP_TYPE_IDS } from '../constants';
@@ -43,12 +44,45 @@ const HF13_EXTRA: ReadonlyArray<readonly [string, FieldType]> = [
   ['distribution_epoch_length','uint32'],
 ];
 
+// HF14: chain_properties_pm (static_variant index 5), order from chain_operations.hpp FC_REFLECT.
+const PM_EXTRA: ReadonlyArray<readonly [string, FieldType]> = [
+  ...HF13_EXTRA,
+  ['pm_oracle_registration_fee','asset'],['pm_min_oracle_insurance','asset'],
+  ['pm_market_creation_fee','asset'],['pm_min_liquidity','asset'],
+  ['pm_max_outcomes','uint8'],['pm_max_market_duration','uint32'],
+  ['pm_max_oracle_fee_percent','uint16'],['pm_oracle_accept_window_sec','uint32'],
+  ['pm_listing_min_coverage_percent','uint16'],['pm_betting_min_coverage_percent','uint16'],
+  ['pm_default_time_penalty_percent','uint16'],['pm_max_time_penalty','uint32'],
+  ['pm_dispute_fee','asset'],['pm_dispute_grace_sec','uint32'],
+  ['pm_oracle_dispute_response_sec','uint32'],['pm_dispute_auto_close_sec','uint32'],
+  ['pm_dispute_vote_period_sec','uint32'],['pm_dispute_approve_min_percent','uint16'],
+  ['pm_oracle_penalty_percent','uint16'],['pm_no_contest_penalty_percent','uint16'],
+  ['pm_dispute_reward_multiplier','uint32'],['pm_batch_epoch_blocks','uint32'],
+  ['pm_reveal_window_blocks','uint32'],['pm_commit_no_reveal_penalty_percent','uint16'],
+  ['pm_min_batch_bet','asset'],['pm_commit_reveal_enabled','bool'],
+  ['pm_processing_cap_per_block','uint32'],['pm_lazy_pool_enabled','bool'],
+  ['pm_lazy_alloc_percent','uint16'],['pm_lazy_max_total_alloc_percent','uint16'],
+  ['pm_lazy_lock_sec','uint32'],['pm_lazy_recall_step_percent','uint16'],
+  ['pm_lazy_emergency_penalty_percent','uint16'],['pm_lazy_min_liquidity_fee_percent','uint16'],
+  ['pm_leverage_enabled','bool'],['pm_leverage_fund_percent','uint16'],
+  ['pm_leverage_max_per_position_bp','uint16'],['pm_leverage_pool_profit_percent','uint16'],
+  ['pm_leverage_safety_margin_percent','uint16'],['pm_leverage_max_slippage_percent','uint16'],
+  ['pm_leverage_min_market_liquidity','asset'],['pm_leverage_max_position_ratio_percent','uint16'],
+  ['pm_leverage_expiration_buffer_sec','uint32'],['pm_leverage_m_factor_percent','uint16'],
+  ['pm_leverage_funding_rate_ppm_per_day','uint32'],['pm_conversion_profit_cost_percent','uint16'],
+  ['pm_closed_market_retention_sec','uint32'],['pm_early_exit_reward_cap_percent','uint16'],
+  ['pm_min_bet','asset'],['pm_settle_rows_per_block','uint32'],
+  ['committee_votes_per_request','uint32'],['committee_vote_min_vesting','asset'],
+  ['pm_dispute_votes_per_market','uint32'],['pm_dispute_vote_min_vesting','asset'],
+];
+
 const VERSIONED_PROPS_FIELDS: ReadonlyArray<ReadonlyArray<readonly [string, FieldType]>> = [
   CHAIN_PROPS_INIT_FIELDS,
   [...CHAIN_PROPS_INIT_FIELDS, ...HF4_EXTRA],
   [...CHAIN_PROPS_INIT_FIELDS, ...HF6_EXTRA],
   [...CHAIN_PROPS_INIT_FIELDS, ...HF9_EXTRA],
   [...CHAIN_PROPS_INIT_FIELDS, ...HF13_EXTRA],
+  [...CHAIN_PROPS_INIT_FIELDS, ...PM_EXTRA],
 ];
 
 function writeChainPropsFields(w: ByteWriter, props: Record<string, unknown>, fields: ReadonlyArray<readonly [string, FieldType]>): void {
@@ -64,6 +98,7 @@ function writeField(w: ByteWriter, type: FieldType, v: unknown): void {
     case 'authority': writeAuthority(w, v as Record<string, unknown>); break;
     case 'pubkey': w.pubkey(String(v)); break;
     case 'bool': w.bool(Boolean(v)); break;
+    case 'int8': w.uint8(Number(v)); break; // & 0xff in uint8 yields two's complement
     case 'uint8': w.uint8(Number(v)); break;
     case 'uint16': w.uint16(Number(v)); break;
     case 'uint32': w.uint32(Number(v)); break;
@@ -73,6 +108,21 @@ function writeField(w: ByteWriter, type: FieldType, v: unknown): void {
     case 'varint': w.varint32(Number(v)); break;
     case 'time': w.time(String(v)); break;
     case 'extensions': w.varint32(0); break; // empty set
+    case 'sha256': {
+      const hex = String(v ?? '');
+      if (!/^[0-9a-fA-F]{64}$/.test(hex)) throw new VizValidationError({ field: 'sha256', expected: '64 hex chars', received: hex });
+      w.raw(hexToBytes(hex));
+      break;
+    }
+    case 'optional-asset':
+      w.optional(v == null ? undefined : String(v), (ww, s) => writeAsset(ww, s));
+      break;
+    case 'optional-uint16':
+      w.optional(v == null ? undefined : Number(v), (ww, n) => ww.uint16(n));
+      break;
+    case 'optional-bool':
+      w.optional(v == null ? undefined : Boolean(v), (ww, b) => ww.bool(b));
+      break;
     case 'string[]':
       w.vector((v as string[]) ?? [], (ww, s) => ww.string(s));
       break;
@@ -121,7 +171,7 @@ function writeField(w: ByteWriter, type: FieldType, v: unknown): void {
       const [typeId, props] = v as [number, Record<string, unknown>];
       w.varint32(typeId);
       const fields = VERSIONED_PROPS_FIELDS[typeId];
-      if (!fields) throw new VizValidationError({ field: 'versioned_chain_props', expected: 'typeId 0-4', received: typeId });
+      if (!fields) throw new VizValidationError({ field: 'versioned_chain_props', expected: 'typeId 0-5', received: typeId });
       writeChainPropsFields(w, props, fields);
       break;
     }

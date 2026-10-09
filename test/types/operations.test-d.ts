@@ -14,3 +14,9 @@ expectAssignable<OperationParams<'transfer'>>({
 
 expectAssignable<OperationName>('committee_vote_request');
 expectAssignable<OperationName>('transfer');
+
+expectAssignable<OperationName>('pm_place_bet');
+expectAssignable<OperationParams<'pm_lazy_deposit'>>({
+  account: 'alice' as AccountName,
+  amount: '1.000 VIZ' as AssetInput<'VIZ'>,
+});
