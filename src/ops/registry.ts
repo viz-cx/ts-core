@@ -247,6 +247,155 @@ export interface OperationMap {
     accountOfferPrice: AssetInput<'VIZ'>;
     accountOnSale: boolean;
   };
+
+  // ─── HF14 Prediction Markets (Onix) ─────────────────────────
+  // Asset fields take AssetInput; ids/percents/indices are plain numbers.
+  // Times are ISO strings ('2030-01-01T00:00:00'); `commitment` is 64 hex chars.
+  pm_oracle_register: {
+    owner: AccountName;
+    insurance: AssetInput<'VIZ'>;
+    feePercent: number;
+    fixedFee: AssetInput<'VIZ'>;
+    rulesUrl: string;
+    autoAcceptCreator: AccountName | '';
+    autoAcceptResolver: AccountName | '';
+    autoAccept: boolean;
+  };
+  pm_oracle_update: {
+    owner: AccountName;
+    insuranceDelta?: AssetInput<'VIZ'>;
+    feePercent?: number;
+    fixedFee?: AssetInput<'VIZ'>;
+    rulesUrl?: string;
+    autoAcceptCreator?: AccountName | '';
+    autoAcceptResolver?: AccountName | '';
+    autoAccept?: boolean;
+  };
+  pm_create_market: {
+    creator: AccountName;
+    oracle: AccountName;
+    marketType: number;
+    /** Order is preserved on the wire (not sorted). */
+    outcomes: string[];
+    url: string;
+    oracleFeePercent: number;
+    oracleFixedFee: AssetInput<'VIZ'>;
+    creatorFeePercent: number;
+    liquidityFeePercent: number;
+    liquidity: AssetInput<'VIZ'>;
+    lmsrB: number;
+    bettingExpiration: string;
+    resultExpiration: string;
+    timePenaltyType: number;
+    timePenaltyValue: number;
+    penaltyCurveType: number;
+    allowEarlyResolution: boolean;
+    allowCancellation: boolean;
+    allowBatch: boolean;
+    allowInstantBet: boolean;
+    endogeneityTier: number;
+    disputeMode: number;
+    disputeResolver: AccountName | '';
+    disputePenaltyPercent: number;
+    metadata: string;
+  };
+  pm_oracle_accept_market: {
+    oracle: AccountName;
+    marketId: number;
+    accept: boolean;
+    oracleFeePercent: number;
+    oracleFixedFee: AssetInput<'VIZ'>;
+  };
+  pm_place_bet: {
+    account: AccountName;
+    marketId: number;
+    /** -1 = none (multi-outcome), 0 = NO, 1 = YES. */
+    side: number;
+    /** -1 = none (binary). */
+    outcomeIndex: number;
+    amount: AssetInput<'VIZ'>;
+    minTokens: number;
+    mode: number;
+  };
+  pm_commit_bet: {
+    account: AccountName;
+    marketId: number;
+    /** sha256 hex (64 chars). */
+    commitment: string;
+    escrowAmount: AssetInput<'VIZ'>;
+    noRevealFeePercent: number;
+  };
+  pm_reveal_bet: {
+    account: AccountName;
+    commitId: number;
+    side: number;
+    outcomeIndex: number;
+    amount: AssetInput<'VIZ'>;
+    salt: string;
+    minTokens: number;
+  };
+  pm_cancel_bet: { account: AccountName; betId: number; minReturn: number };
+  pm_add_liquidity: { provider: AccountName; marketId: number; amount: AssetInput<'VIZ'> };
+  pm_withdraw_liquidity: { provider: AccountName; liquidityId: number; amount: AssetInput<'VIZ'> };
+  pm_resolve_market: {
+    oracle: AccountName;
+    marketId: number;
+    winningOutcome: number;
+    decisionUrl: string;
+    decisionReason: string;
+  };
+  pm_no_contest: { oracle: AccountName; marketId: number; reason: string };
+  pm_dispute_create: {
+    disputer: AccountName;
+    marketId: number;
+    proposedOutcome: number;
+    reason: string;
+  };
+  /** Requires regular authority (active also satisfies it). */
+  pm_dispute_vote: {
+    voter: AccountName;
+    marketId: number;
+    voteOutcome: number;
+    votePercent: number;
+  };
+  pm_dispute_resolve: {
+    resolver: AccountName;
+    marketId: number;
+    correctOutcome: number;
+    penaltyAmount: AssetInput<'VIZ'>;
+    banOracle: boolean;
+    banOracleUntil: string;
+    banCreator: boolean;
+    banCreatorUntil: string;
+  };
+  pm_transfer_position: {
+    from: AccountName;
+    betId: number;
+    to: AccountName;
+    /** Share weight (int64), NOT an asset. */
+    amount: number;
+    memo?: string;
+  };
+  pm_lazy_deposit: { account: AccountName; amount: AssetInput<'VIZ'> };
+  pm_lazy_withdraw: { account: AccountName; shares: number; emergency: boolean };
+  pm_leverage_open: {
+    account: AccountName;
+    marketId: number;
+    outcomeIndex: number;
+    collateral: AssetInput<'VIZ'>;
+    loan: AssetInput<'VIZ'>;
+    minTokens: number;
+    maxSlippagePercent: number;
+  };
+  pm_leverage_close: { account: AccountName; positionId: number; minReturn: number };
+  pm_leverage_convert: { account: AccountName; positionId: number; conversionProfitCost: number };
+  pm_dispute_oracle_respond: { oracle: AccountName; marketId: number; response: string };
+  pm_unban: {
+    resolver: AccountName;
+    target: AccountName;
+    unbanOracle: boolean;
+    unbanCreator: boolean;
+  };
 }
 
 export type OperationName = keyof OperationMap;
@@ -271,4 +420,11 @@ export const OP_NAMES: ReadonlyArray<OperationName> = [
   'request_account_recovery', 'recover_account', 'change_recovery_account',
   'fixed_award', 'set_account_price', 'set_subaccount_price', 'buy_account', 'target_account_sale',
   'set_reward_sharing',
+  'pm_oracle_register', 'pm_oracle_update', 'pm_create_market', 'pm_oracle_accept_market',
+  'pm_place_bet', 'pm_commit_bet', 'pm_reveal_bet', 'pm_cancel_bet',
+  'pm_add_liquidity', 'pm_withdraw_liquidity', 'pm_resolve_market', 'pm_no_contest',
+  'pm_dispute_create', 'pm_dispute_vote', 'pm_dispute_resolve', 'pm_transfer_position',
+  'pm_lazy_deposit', 'pm_lazy_withdraw',
+  'pm_leverage_open', 'pm_leverage_close', 'pm_leverage_convert',
+  'pm_dispute_oracle_respond', 'pm_unban',
 ];

@@ -81,6 +81,30 @@ export interface TxBuilder {
   setSubaccountPrice(p: OperationParams<'set_subaccount_price'>): TxBuilder;
   buyAccount(p: OperationParams<'buy_account'>): TxBuilder;
   targetAccountSale(p: OperationParams<'target_account_sale'>): TxBuilder;
+  // ─── Prediction markets (HF14) ──────────────────────────────
+  pmOracleRegister(p: OperationParams<'pm_oracle_register'>): TxBuilder;
+  pmOracleUpdate(p: OperationParams<'pm_oracle_update'>): TxBuilder;
+  pmCreateMarket(p: OperationParams<'pm_create_market'>): TxBuilder;
+  pmOracleAcceptMarket(p: OperationParams<'pm_oracle_accept_market'>): TxBuilder;
+  pmPlaceBet(p: OperationParams<'pm_place_bet'>): TxBuilder;
+  pmCommitBet(p: OperationParams<'pm_commit_bet'>): TxBuilder;
+  pmRevealBet(p: OperationParams<'pm_reveal_bet'>): TxBuilder;
+  pmCancelBet(p: OperationParams<'pm_cancel_bet'>): TxBuilder;
+  pmAddLiquidity(p: OperationParams<'pm_add_liquidity'>): TxBuilder;
+  pmWithdrawLiquidity(p: OperationParams<'pm_withdraw_liquidity'>): TxBuilder;
+  pmResolveMarket(p: OperationParams<'pm_resolve_market'>): TxBuilder;
+  pmNoContest(p: OperationParams<'pm_no_contest'>): TxBuilder;
+  pmDisputeCreate(p: OperationParams<'pm_dispute_create'>): TxBuilder;
+  pmDisputeVote(p: OperationParams<'pm_dispute_vote'>): TxBuilder;
+  pmDisputeResolve(p: OperationParams<'pm_dispute_resolve'>): TxBuilder;
+  pmTransferPosition(p: OperationParams<'pm_transfer_position'>): TxBuilder;
+  pmLazyDeposit(p: OperationParams<'pm_lazy_deposit'>): TxBuilder;
+  pmLazyWithdraw(p: OperationParams<'pm_lazy_withdraw'>): TxBuilder;
+  pmLeverageOpen(p: OperationParams<'pm_leverage_open'>): TxBuilder;
+  pmLeverageClose(p: OperationParams<'pm_leverage_close'>): TxBuilder;
+  pmLeverageConvert(p: OperationParams<'pm_leverage_convert'>): TxBuilder;
+  pmDisputeOracleRespond(p: OperationParams<'pm_dispute_oracle_respond'>): TxBuilder;
+  pmUnban(p: OperationParams<'pm_unban'>): TxBuilder;
   build(): Promise<UnsignedTransaction>;
   sign(key: Wif | string): SignedTxBuilder;
 }
@@ -104,6 +128,16 @@ const ASSET_SYMBOL_FIELDS: Record<string, AssetSymbol> = {
   tokensToShares: 'VIZ',
   requiredAmountMin: 'VIZ',
   requiredAmountMax: 'VIZ',
+  // HF14 prediction markets (pm_transfer_position.amount is an int64 and passes through untouched)
+  insurance: 'VIZ',
+  insuranceDelta: 'VIZ',
+  fixedFee: 'VIZ',
+  oracleFixedFee: 'VIZ',
+  liquidity: 'VIZ',
+  escrowAmount: 'VIZ',
+  penaltyAmount: 'VIZ',
+  collateral: 'VIZ',
+  loan: 'VIZ',
 };
 
 // Fields that are required in the wire format but optional (or absent) in our TS API.
@@ -240,6 +274,29 @@ export function createTxBuilder(opts: TxBuilderOptions): TxBuilder {
     setSubaccountPrice:             (p) => builder.op('set_subaccount_price', p),
     buyAccount:                     (p) => builder.op('buy_account', p),
     targetAccountSale:              (p) => builder.op('target_account_sale', p),
+    pmOracleRegister:               (p) => builder.op('pm_oracle_register', p),
+    pmOracleUpdate:                 (p) => builder.op('pm_oracle_update', p),
+    pmCreateMarket:                 (p) => builder.op('pm_create_market', p),
+    pmOracleAcceptMarket:           (p) => builder.op('pm_oracle_accept_market', p),
+    pmPlaceBet:                     (p) => builder.op('pm_place_bet', p),
+    pmCommitBet:                    (p) => builder.op('pm_commit_bet', p),
+    pmRevealBet:                    (p) => builder.op('pm_reveal_bet', p),
+    pmCancelBet:                    (p) => builder.op('pm_cancel_bet', p),
+    pmAddLiquidity:                 (p) => builder.op('pm_add_liquidity', p),
+    pmWithdrawLiquidity:            (p) => builder.op('pm_withdraw_liquidity', p),
+    pmResolveMarket:                (p) => builder.op('pm_resolve_market', p),
+    pmNoContest:                    (p) => builder.op('pm_no_contest', p),
+    pmDisputeCreate:                (p) => builder.op('pm_dispute_create', p),
+    pmDisputeVote:                  (p) => builder.op('pm_dispute_vote', p),
+    pmDisputeResolve:               (p) => builder.op('pm_dispute_resolve', p),
+    pmTransferPosition:             (p) => builder.op('pm_transfer_position', p),
+    pmLazyDeposit:                  (p) => builder.op('pm_lazy_deposit', p),
+    pmLazyWithdraw:                 (p) => builder.op('pm_lazy_withdraw', p),
+    pmLeverageOpen:                 (p) => builder.op('pm_leverage_open', p),
+    pmLeverageClose:                (p) => builder.op('pm_leverage_close', p),
+    pmLeverageConvert:              (p) => builder.op('pm_leverage_convert', p),
+    pmDisputeOracleRespond:         (p) => builder.op('pm_dispute_oracle_respond', p),
+    pmUnban:                        (p) => builder.op('pm_unban', p),
 
     async build() {
       if (ops.length === 0) {

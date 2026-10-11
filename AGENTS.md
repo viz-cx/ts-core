@@ -43,7 +43,7 @@ src/
   errors.ts         VizRpcError, VizValidationError, VizTransportError
   types.ts          branded types (AccountName, PublicKey, Wif), ChainProperties
   ops/
-    registry.ts     single source of truth for OperationMap — 43 op-names (40 ops + 3 deprecated witness_* aliases)
+    registry.ts     single source of truth for OperationMap — 66 op-names (63 ops incl. 23 HF14 prediction-market ops + 3 deprecated witness_* aliases)
     curated.ts      named-arg curated methods, implicit-field injection map
     raw.ts          op('name', params) escape hatch
 
@@ -64,7 +64,7 @@ test/
 - **`viz-js-lib` ships two operation registries.** `lib/broadcast/operations.js` is broader than the binary serializer's `st_operations` in `lib/auth/serializer/src/operations.js`. Only ops with a binary serializer are broadcastable today. `claim_reward_balance` is in the former but not the latter — do not add it to our registry until upstream wires the serializer.
 - **Witness → validator rename (viz-js-lib 0.12.6).** New ops: `validator_update`, `account_validator_vote`, `account_validator_proxy`, `set_reward_sharing`. Old `witness_*` op-names remain as deprecated aliases that route through the new serializers. The serializer aliases the op *name* but rejects the old `witness` field — `account_witness_vote` payloads must now use `validator`. Read API namespace moved from `witness_api` to `validator_api`.
 - **Asset fields accept three shapes**: canonical string (`'1.000 VIZ'`), an `Asset` instance, or `{ value, symbol }`. `energy`/`maxEnergy` are chain units (100 = 1%).
-- **Minimal runtime dependencies.** Only `@noble/secp256k1` and `@noble/hashes` are in `dependencies`. `viz-js-lib` is a `devDependency` (test oracle only — never imported from `src/`). Don't add further `dependencies` without strong justification — the 100 KB tarball budget is enforced by `pnpm size`.
+- **Minimal runtime dependencies.** Only `@noble/secp256k1` and `@noble/hashes` are in `dependencies`. `viz-js-lib` is a `devDependency` (test oracle only — never imported from `src/`). Don't add further `dependencies` without strong justification — the 128 KB tarball budget is enforced by `pnpm size`.
 
 ## Adding a new operation
 

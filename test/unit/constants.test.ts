@@ -15,5 +15,10 @@ describe('chain constants', () => {
     expect(OP_TYPE_IDS['custom']).toBe(10);
     expect(OP_TYPE_IDS['award']).toBe(47);
     expect(OP_TYPE_IDS['set_reward_sharing']).toBe(64);
+    expect(OP_TYPE_IDS['pm_oracle_register']).toBe(66);
+    expect(OP_TYPE_IDS['pm_lazy_withdraw']).toBe(83);
+    expect(OP_TYPE_IDS['pm_leverage_open']).toBe(91);
+    expect(OP_TYPE_IDS['pm_unban']).toBe(99);
+    expect(OP_TYPE_IDS['pm_batch_settle']).toBeUndefined(); // virtual
   });
 });

@@ -1,7 +1,8 @@
 export type FieldType =
   | 'string' | 'asset' | 'authority' | 'pubkey' | 'bool'
-  | 'uint8' | 'uint16' | 'uint32' | 'int16' | 'int64' | 'uint64' | 'varint' | 'time'
+  | 'int8' | 'uint8' | 'uint16' | 'uint32' | 'int16' | 'int64' | 'uint64' | 'varint' | 'time' | 'sha256'
   | 'string[]' | 'string-set' | 'optional-string' | 'optional-time'
+  | 'optional-asset' | 'optional-uint16' | 'optional-bool'
   | 'pubkey[]' | 'pubkey-set'
   | 'optional-authority' | 'optional-pubkey'
   | 'beneficiaries' | 'chain_properties' | 'versioned_chain_props'
@@ -132,6 +133,101 @@ export const OP_SCHEMA: Record<string, ReadonlyArray<readonly [string, FieldType
     ['account_offer_price','asset'],['account_on_sale','bool'],
   ],
   set_reward_sharing: [['owner','string'],['sharing_rate','uint16']],
+  // HF14 Prediction Markets (Onix) — order from viz-cpp-node pm_operations.hpp FC_REFLECT.
+  pm_oracle_register: [
+    ['owner','string'],['insurance','asset'],['fee_percent','uint16'],['fixed_fee','asset'],
+    ['rules_url','string'],['auto_accept_creator','string'],['auto_accept_resolver','string'],
+    ['auto_accept','bool'],['extensions','extensions'],
+  ],
+  pm_oracle_update: [
+    ['owner','string'],['insurance_delta','optional-asset'],['fee_percent','optional-uint16'],
+    ['fixed_fee','optional-asset'],['rules_url','optional-string'],
+    ['auto_accept_creator','optional-string'],['auto_accept_resolver','optional-string'],
+    ['auto_accept','optional-bool'],['extensions','extensions'],
+  ],
+  pm_create_market: [
+    ['creator','string'],['oracle','string'],['market_type','uint8'],['outcomes','string[]'],
+    ['url','string'],['oracle_fee_percent','uint16'],['oracle_fixed_fee','asset'],
+    ['creator_fee_percent','uint16'],['liquidity_fee_percent','uint16'],['liquidity','asset'],
+    ['lmsr_b','int64'],['betting_expiration','time'],['result_expiration','time'],
+    ['time_penalty_type','uint8'],['time_penalty_value','uint32'],['penalty_curve_type','uint8'],
+    ['allow_early_resolution','bool'],['allow_cancellation','bool'],['allow_batch','bool'],
+    ['allow_instant_bet','bool'],['endogeneity_tier','uint8'],['dispute_mode','uint8'],
+    ['dispute_resolver','string'],['dispute_penalty_percent','int16'],['metadata','string'],
+    ['extensions','extensions'],
+  ],
+  pm_oracle_accept_market: [
+    ['oracle','string'],['market_id','int64'],['accept','bool'],
+    ['oracle_fee_percent','uint16'],['oracle_fixed_fee','asset'],['extensions','extensions'],
+  ],
+  pm_place_bet: [
+    ['account','string'],['market_id','int64'],['side','int8'],['outcome_index','int16'],
+    ['amount','asset'],['min_tokens','int64'],['mode','uint8'],['extensions','extensions'],
+  ],
+  pm_commit_bet: [
+    ['account','string'],['market_id','int64'],['commitment','sha256'],
+    ['escrow_amount','asset'],['no_reveal_fee_percent','uint16'],['extensions','extensions'],
+  ],
+  pm_reveal_bet: [
+    ['account','string'],['commit_id','int64'],['side','int8'],['outcome_index','int16'],
+    ['amount','asset'],['salt','string'],['min_tokens','int64'],['extensions','extensions'],
+  ],
+  pm_cancel_bet: [
+    ['account','string'],['bet_id','int64'],['min_return','int64'],['extensions','extensions'],
+  ],
+  pm_add_liquidity: [
+    ['provider','string'],['market_id','int64'],['amount','asset'],['extensions','extensions'],
+  ],
+  pm_withdraw_liquidity: [
+    ['provider','string'],['liquidity_id','int64'],['amount','asset'],['extensions','extensions'],
+  ],
+  pm_resolve_market: [
+    ['oracle','string'],['market_id','int64'],['winning_outcome','int16'],
+    ['decision_url','string'],['decision_reason','string'],['extensions','extensions'],
+  ],
+  pm_no_contest: [
+    ['oracle','string'],['market_id','int64'],['reason','string'],['extensions','extensions'],
+  ],
+  pm_dispute_create: [
+    ['disputer','string'],['market_id','int64'],['proposed_outcome','int16'],
+    ['reason','string'],['extensions','extensions'],
+  ],
+  pm_dispute_vote: [
+    ['voter','string'],['market_id','int64'],['vote_outcome','int16'],
+    ['vote_percent','int16'],['extensions','extensions'],
+  ],
+  pm_dispute_resolve: [
+    ['resolver','string'],['market_id','int64'],['correct_outcome','int16'],
+    ['penalty_amount','asset'],['ban_oracle','bool'],['ban_oracle_until','time'],
+    ['ban_creator','bool'],['ban_creator_until','time'],['extensions','extensions'],
+  ],
+  pm_transfer_position: [
+    ['from','string'],['bet_id','int64'],['to','string'],['amount','int64'],
+    ['memo','string'],['extensions','extensions'],
+  ],
+  pm_lazy_deposit: [['account','string'],['amount','asset'],['extensions','extensions']],
+  pm_lazy_withdraw: [
+    ['account','string'],['shares','int64'],['emergency','bool'],['extensions','extensions'],
+  ],
+  pm_leverage_open: [
+    ['account','string'],['market_id','int64'],['outcome_index','int16'],
+    ['collateral','asset'],['loan','asset'],['min_tokens','int64'],
+    ['max_slippage_percent','uint16'],['extensions','extensions'],
+  ],
+  pm_leverage_close: [
+    ['account','string'],['position_id','int64'],['min_return','int64'],['extensions','extensions'],
+  ],
+  pm_leverage_convert: [
+    ['account','string'],['position_id','int64'],['conversion_profit_cost','uint16'],
+    ['extensions','extensions'],
+  ],
+  pm_dispute_oracle_respond: [
+    ['oracle','string'],['market_id','int64'],['response','string'],['extensions','extensions'],
+  ],
+  pm_unban: [
+    ['resolver','string'],['target','string'],['unban_oracle','bool'],['unban_creator','bool'],
+    ['extensions','extensions'],
+  ],
 };
 
 // Deprecated aliases share schemas and type IDs:
