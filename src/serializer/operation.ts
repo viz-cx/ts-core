@@ -98,7 +98,12 @@ function writeField(w: ByteWriter, type: FieldType, v: unknown): void {
     case 'authority': writeAuthority(w, v as Record<string, unknown>); break;
     case 'pubkey': w.pubkey(String(v)); break;
     case 'bool': w.bool(Boolean(v)); break;
-    case 'int8': w.uint8(Number(v)); break; // & 0xff in uint8 yields two's complement
+    case 'int8': {
+      const n = Number(v);
+      if (!Number.isInteger(n) || n < -128 || n > 127) throw new VizValidationError({ field: 'int8', expected: 'integer -128..127', received: String(v) });
+      w.uint8(n); // & 0xff in uint8 yields two's complement
+      break;
+    }
     case 'uint8': w.uint8(Number(v)); break;
     case 'uint16': w.uint16(Number(v)); break;
     case 'uint32': w.uint32(Number(v)); break;

@@ -5,6 +5,8 @@ import type { VizClient } from '../../src/client';
 import type { Transport } from '../../src/transport';
 import type { PublicKey, Authority, ChainProperties } from '../../src/types';
 import { keys } from '../../src/auth';
+import { CURATED_METHOD_TO_OP, CURATED_IMPLICIT_FIELD } from '../../src/ops/curated';
+import pmVectors from '../fixtures/pm-vectors.json';
 
 const dgpResponse = {
   head_block_id: '00000010abcdef1234567890',
@@ -75,6 +77,21 @@ async function send(method: keyof VizClient, args: Record<string, unknown>) {
 
 describe('curated methods', () => {
   // ─── Prediction markets ─────────────────────────────────────────────────────
+
+  describe('every pm* method', () => {
+    const pmMethods = Object.entries(CURATED_METHOD_TO_OP).filter(([m]) => m.startsWith('pm'));
+    it('covers all 23 PM ops', () => expect(pmMethods).toHaveLength(23));
+    for (const [method, opName] of pmMethods) {
+      it(`${method} injects its implicit field`, async () => {
+        const implicit = CURATED_IMPLICIT_FIELD[method as keyof typeof CURATED_IMPLICIT_FIELD]!;
+        const args = { ...pmVectors.find(v => v.name === opName)!.input } as Record<string, unknown>;
+        delete args[implicit];
+        const [op, p] = await send(method as keyof VizClient, args);
+        expect(op).toBe(opName);
+        expect(p[implicit]).toBe('alice');
+      });
+    }
+  });
 
   describe('pmPlaceBet', () => {
     it('injects `account`, snake-cases keys and normalizes amount', async () => {

@@ -13,6 +13,20 @@ describe('HF14 prediction-market vectors (cross-library)', () => {
     });
   }
 
+  it('writes int8 side -1 as two\'s complement', () => {
+    const bet = vectors.find(v => v.name === 'pm_place_bet')!;
+    // op id (1) + "alice" (6) + market_id int64 (8) → side at byte 15
+    expect(bet.hex.slice(30, 32)).toBe('01');
+    const w = new ByteWriter();
+    writeOperation(w, 'pm_place_bet', { ...bet.input, side: -1 } as Record<string, unknown>);
+    expect(w.hex()).toBe(bet.hex.slice(0, 30) + 'ff' + bet.hex.slice(32));
+  });
+
+  it('rejects an out-of-range int8', () => {
+    const bet = vectors.find(v => v.name === 'pm_place_bet')!;
+    expect(() => writeOperation(new ByteWriter(), 'pm_place_bet', { ...bet.input, side: 200 } as Record<string, unknown>)).toThrow(/int8/);
+  });
+
   it('rejects a malformed commitment', () => {
     const w = new ByteWriter();
     expect(() => writeOperation(w, 'pm_commit_bet', {

@@ -91,6 +91,7 @@ export interface CuratedClient {
   pmResolveMarket:        CuratedMethod<'pm_resolve_market', 'oracle'>;
   pmNoContest:            CuratedMethod<'pm_no_contest', 'oracle'>;
   pmDisputeCreate:        CuratedMethod<'pm_dispute_create', 'disputer'>;
+  /** Requires regular authority (active also satisfies it). */
   pmDisputeVote:          CuratedMethod<'pm_dispute_vote', 'voter'>;
   pmDisputeResolve:       CuratedMethod<'pm_dispute_resolve', 'resolver'>;
   pmTransferPosition:     CuratedMethod<'pm_transfer_position', 'from'>;
